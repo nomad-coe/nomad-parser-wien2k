@@ -1,9 +1,10 @@
 from builtins import object
 import setup_paths
-from nomadcore.simple_parser import mainFunction
+from nomadcore.simple_parser import mainFunction, AncillaryParser, CachingLevel
 from nomadcore.simple_parser import SimpleMatcher as SM
 from nomadcore.local_meta_info import loadJsonFile, InfoKindEl
 import os, sys, json
+import wien2k_parser_struct
 
 class Wien2kContext(object):
     """context for wien2k parser"""
@@ -13,7 +14,7 @@ class Wien2kContext(object):
 
     def initialize_values(self):
         """allows to reset values if the same superContext is used to parse different files"""
-        pass
+        self.metaInfoEnv = self.parser.parserBuilder.metaInfoEnv
 
     def startedParsing(self, path, parser):
         """called when parsing starts"""
@@ -26,6 +27,21 @@ class Wien2kContext(object):
                          section["x_wien2k_version"][0] + " " +
                          section["x_wien2k_release_date"][0])
 
+    def onOpen_section_system(self, backend, gIndex, section):
+
+        structSuperContext = wien2k_parser_struct.Wien2kStructContext()
+        structParser = AncillaryParser(
+            fileDescription = wien2k_parser_struct.buildStructureMatchers(),
+            parser = self.parser,
+            cachingLevelForMetaName = wien2k_parser_struct.get_cachingLevelForMetaName(self.metaInfoEnv, CachingLevel.PreOpenedIgnore),
+            superContext = structSuperContext)
+
+        mainFile = self.parser.fIn.fIn.name
+        fName = mainFile[:-4] + ".struct"
+        if os.path.exists(fName):
+            with open(fName) as fIn:
+                structParser.parseFile(fIn)
+
 # description of the input
 mainFileDescription = SM(
     name = 'root',
@@ -37,7 +53,7 @@ mainFileDescription = SM(
            repeats = True,
            required = True,
            forwardMatch = True,
-           sections   = ['section_run', 'section_single_configuration_calculation'],
+           sections   = ['section_run', 'section_method', 'section_system', 'section_single_configuration_calculation'],
            subMatchers = [
                SM(
                    name = 'header',
@@ -48,9 +64,12 @@ mainFileDescription = SM(
                   name = "scf iteration",
                   startReStr = r"\s*:ITE(?P<x_wien2k_iteration_number>[0-9]+):\s*[0-9]*. ITERATION",
                   sections=["section_scf_iteration"],
+                  repeats = True,
                   subMatchers=[
                       SM(r":NATO :\s*(?P<x_wien2k_number_of_independent_atoms>[0-9]+)INDEPENDENT AND\s*(?P<x_wien2k_total_atoms>[0-9]+)\s*TOTAL ATOMS IN UNITCELL"),
-                      SM("\s*SUBSTANCE: (?P<x_wien2k_system_name>.*)")
+                      SM(r"\s*SUBSTANCE: (?P<x_wien2k_system_name>.*)"),
+                      SM(r":POT\s*:\s*POTENTIAL OPTION\s*(?P<x_wien2k_potential_option>[0-9]+)"),
+                      SM(r":VOL\s*:\s*UNIT CELL VOLUME\s*=\s*(?P<x_wien2k_unit_cell_volume__angstrom3>[0-9.]+)")
                   ]
               )
            ]

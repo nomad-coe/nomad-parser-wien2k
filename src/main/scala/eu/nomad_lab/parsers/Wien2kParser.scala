@@ -27,6 +27,7 @@ object Wien2kParser extends SimpleExternalParserGenerator(
     "--uri", "${mainFileUri}", "${mainFilePath}"),
   resList = Seq(
     "parser-wien2k/wien2k_parser.py",
+    "parser-wien2k/wien2k_parser_struct.py",
     "parser-wien2k/setup_paths.py",
     "nomad_meta_info/public.nomadmetainfo.json",
     "nomad_meta_info/common.nomadmetainfo.json",

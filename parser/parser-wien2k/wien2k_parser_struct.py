@@ -32,7 +32,8 @@ def buildStructureMatchers():
     subMatchers = [
         SM(name = 'systemName',
            startReStr = r"(?P<x_wien2k_system_nameIn>.*)"),
-        SM(r"\w+\s*LATTICE,NONEQUIV\.ATOMS:\s*(?P<x_wien2k_nonequiv_atoms>[0-9]+)"),
+        SM(r"\w+\s*LATTICE,NONEQUIV\.ATOMS.\s*(?P<x_wien2k_nonequiv_atoms>[0-9]+)"),
+        SM(r"(?P<x_wien2k_calc_mode>.*)"),
         SM(r"\s*ATOM\s*[-0-9]+:\s*X=(?P<x_wien2k_atom_pos_x>[-+0-9.eEdD]+)\s*Y=(?P<x_wien2k_atom_pos_y>[-+0-9.eEdD]+)\s*Z=(?P<x_wien2k_atom_pos_z>[-+0-9.eEdD]+)",
            repeats=True,
            sections=["x_wien2k_section_equiv_atoms"],

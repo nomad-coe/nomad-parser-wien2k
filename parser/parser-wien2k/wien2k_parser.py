@@ -72,7 +72,8 @@ mainFileDescription = SM(
                       SM(r":LAT\s*:\s*LATTICE CONSTANTS=\s*(?P<x_wien2k_lattice_const_a>[0-9.]+)\s*(?P<x_wien2k_lattice_const_b>[0-9.]+)\s*(?P<x_wien2k_lattice_const_c>[0-9.]+)"),
                       SM(r":VOL\s*:\s*UNIT CELL VOLUME\s*=\s*(?P<x_wien2k_unit_cell_volume__angstrom3>[0-9.]+)"),
                       SM(r":ENE  : \W*\w*\W*\TOTAL ENERGY IN Ry =\s*(?P<x_wien2k_total_ene>[-+0-9.]+)"),
-                      SM(r":FER  : (\w*\s*)*-\s\w*\W\w*\WM\W*=\s*(?P<x_wien2k_fermi_ene>[-+0-9.]+)")
+                      SM(r":FER  : (\w*\s*)*-\s\w*\W\w*\WM\W*=\s*(?P<x_wien2k_fermi_ene>[-+0-9.]+)"),
+                      SM(r":GAP  : (?P<x_wien2k_ene_gap_Ry>[-+0-9.]+)\s*Ry\s*=\s*(?P<x_wien2k_ene_gap_eV>[-+0-9.]+)\s*eV\s*\W*\w*\s\W")
                   ]
               )
            ]

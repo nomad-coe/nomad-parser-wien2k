@@ -78,7 +78,8 @@ mainFileDescription = SM(
                       SM(r":MMTOT: TOTAL MAGNETIC MOMENT IN CELL =\s*(?P<x_wien2k_mmtot>[-+0-9.]+)"),
                       SM(r":MMINT: MAGNETIC MOMENT IN INTERSTITIAL =\s*(?P<x_wien2k_mmint>[-+0-9.]+)"),
                       SM(r":MMI001: MAGNETIC MOMENT IN SPHERE 1 =\s*(?P<x_wien2k_mmi001>[-+0-9.]+)"),
-                      SM(r":FOR[0-9]*:\s*(?P<x_wien2k_atom_nr>[0-9]+).ATOM\s*(?P<x_wien2k_for_abs>[0-9.]+)\s*(?P<x_wien2k_for_x>[-++0-9.]+)\s*(?P<x_wien2k_for_y>[-++0-9.]+)\s*(?P<x_wien2k_for_z>[-++0-9.]+)\s*partial\sforces")
+                      SM(r":FOR[0-9]*:\s*(?P<x_wien2k_atom_nr>[0-9]+).ATOM\s*(?P<x_wien2k_for_abs>[0-9.]+)\s*(?P<x_wien2k_for_x>[-++0-9.]+)\s*(?P<x_wien2k_for_y>[-++0-9.]+)\s*(?P<x_wien2k_for_z>[-++0-9.]+)\s*partial\sforces", repeats = True),
+                      SM(r":FGL[0-9]*:\s*(?P<x_wien2k_atom_nr>[0-9]+).ATOM\s*(?P<x_wien2k_for_x_gl>[-++0-9.]+)\s*(?P<x_wien2k_for_y_gl>[-++0-9.]+)\s*(?P<x_wien2k_for_z_gl>[-++0-9.]+)\s*partial\sforces", repeats = True)
                   ]
               )
            ]

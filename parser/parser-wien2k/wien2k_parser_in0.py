@@ -28,25 +28,24 @@ def buildIn0Matchers():
     name = 'root',
     weak = True,
     startReStr = "",
-    sections = ["section_run", "section_system"],
+        sections = ["section_run", "section_method"],
     subMatchers = [
-        SM(name = 'systemName',
-           startReStr = r"(?P<x_wien2k_system_nameIn>.*)"),
-        SM(r"\w+\s*LATTICE,NONEQUIV\.ATOMS.\s*(?P<x_wien2k_nonequiv_atoms>[0-9]+)"),
-        SM(r"(?P<x_wien2k_calc_mode>.*)"),
-       # SM(r"\s*(?P<x_wien2k_unit_cell_param_a>[-+0-9.eEdD]+)\s*(?P<x_wien2k_unit_cell_param_b>[-+0-9.eEdD]+)\s*(?P<x_wien2k_unit_cell_param_c>[-+0-9.eEdD]+)\s*(?P<x_wien2k_angle_between_unit_axis_alfa>[-+0-9.eEdD]{9})\s*(?P<x_wien2k_angle_between_unit_axis_beta>[-+0-9.eEdD]{9})\s*(?P<x_wien2k_angle_between_unit_axis_gamma>[-+0-9.eEdD]+)"),
-        SM(r"\s*(?P<x_wien2k_unit_cell_param_a>[-+0-9]*\.\d{0,6}){0,10}\s*(?P<x_wien2k_unit_cell_param_b>[-+0-9]*\.\d{0,6}){0,10}\s*(?P<x_wien2k_unit_cell_param_c>[-+0-9]*\.\d{0,6}){0,10}\s*(?P<x_wien2k_angle_between_unit_axis_alfa>[-+]?[0-9]*\.\d{0,6}){0,10}\s*(?P<x_wien2k_angle_between_unit_axis_beta>[-+]?[0-9]*\.\d{0,6}){0,10}\s*(?P<x_wien2k_angle_between_unit_axis_gamma>[-+]?[0-9]*\.\d*)"),
-        SM(r"\s*ATOM\s*[-0-9]+:\s*X=(?P<x_wien2k_atom_pos_x>[-+0-9.eEdD]+)\s*Y=(?P<x_wien2k_atom_pos_y>[-+0-9.eEdD]+)\s*Z=(?P<x_wien2k_atom_pos_z>[-+0-9.eEdD]+)",
-           repeats=True,
-           sections=["x_wien2k_section_equiv_atoms"],
-           subMatchers=[
-               SM(r"\s*[-0-9]+:\s*X=(?P<x_wien2k_atom_pos_x>[-+0-9.eEdD]+)\s*Y=(?P<x_wien2k_atom_pos_y>[-+0-9.eEdD]+)\s*Z=(?P<x_wien2k_atom_pos_z>[-+0-9.eEdD]+)",
-                  repeats=True
-              ),
-    #           SM(r"\s*(?P<atom>.{10})\s*NPT=\s*(?P<NPT>[0-9]+)\s*R0=(?P<r0>[0-9.]+)\s*RMT=\s*(?P<rmt>[0-9.]+)\s*Z:\s*(?P<z>[0-9.]+)",)
-               SM(r"\s*(?P<x_wien2k_atom_name>^.+)\s*NPT=\s*(?P<x_wien2k_NPT>[0-9]+)\s*R0=(?P<x_wien2k_R0>[0-9.]+)\s*RMT=\s*(?P<x_wien2k_RMT>[0-9.]+)\s*Z:\s*(?P<x_wien2k_atomic_number_Z>[0-9.]+)",)
-           ]
-       )
+#        SM(name = 'systemName',
+#          startReStr = r"(?P<x_wien2k_system_nameIn>.*)"),
+        SM(r"(?P<x_wien2k_switch>\w*)\s*(?P<x_wien2k_indxc>[0-9]+)\s*.*"),
+        SM(r"\s*(?P<x_wien2k_ifft_x>[0-9]+)\s*(?P<x_wien2k_ifft_y>[0-9]+)\s*(?P<x_wien2k_ifft_z>[0-9]+)\s*(?P<x_wien2k_ifft_factor>[0-9.]+)\s*(?P<x_wien2k_iprint>[0-9]+).*")
+#        SM(r"(?P<x_wien2k_calc_mode>.*)"),
+#        SM(r"\s*(?P<x_wien2k_unit_cell_param_a>[-+0-9]*\.\d{0,6}){0,10}\s*(?P<x_wien2k_unit_cell_param_b>[-+0-9]*\.\d{0,6}){0,10}\s*(?P<x_wien2k_unit_cell_param_c>[-+0-9]*\.\d{0,6}){0,10}\s*(?P<x_wien2k_angle_between_unit_axis_alfa>[-+]?[0-9]*\.\d{0,6}){0,10}\s*(?P<x_wien2k_angle_between_unit_axis_beta>[-+]?[0-9]*\.\d{0,6}){0,10}\s*(?P<x_wien2k_angle_between_unit_axis_gamma>[-+]?[0-9]*\.\d*)"),
+#        SM(r"\s*ATOM\s*[-0-9]+:\s*X=(?P<x_wien2k_atom_pos_x>[-+0-9.eEdD]+)\s*Y=(?P<x_wien2k_atom_pos_y>[-+0-9.eEdD]+)\s*Z=(?P<x_wien2k_atom_pos_z>[-+0-9.eEdD]+)",
+#           repeats=True,
+#           sections=["x_wien2k_section_equiv_atoms"],
+#           subMatchers=[
+#               SM(r"\s*[-0-9]+:\s*X=(?P<x_wien2k_atom_pos_x>[-+0-9.eEdD]+)\s*Y=(?P<x_wien2k_atom_pos_y>[-+0-9.eEdD]+)\s*Z=(?P<x_wien2k_atom_pos_z>[-+0-9.eEdD]+)",
+#                  repeats=True
+#              ),
+#               SM(r"\s*(?P<x_wien2k_atom_name>^.+)\s*NPT=\s*(?P<x_wien2k_NPT>[0-9]+)\s*R0=(?P<x_wien2k_R0>[0-9.]+)\s*RMT=\s*(?P<x_wien2k_RMT>[0-9.]+)\s*Z:\s*(?P<x_wien2k_atomic_number_Z>[0-9.]+)",)
+#           ]
+#       )
     ])
 
 def get_cachingLevelForMetaName(metaInfoEnv, CachingLvl):
@@ -63,9 +62,8 @@ def get_cachingLevelForMetaName(metaInfoEnv, CachingLvl):
     # manually adjust caching of metadata
     cachingLevelForMetaName = {
                                'section_run': CachingLvl,
-                               'section_system': CachingLvl
+                               'section_method': CachingLvl
                               }
-    cachingLevelForMetaName["x_wien2k_system_nameIn"] = CachingLevel.ForwardAndCache
     return cachingLevelForMetaName
 
 # loading metadata from nomad-meta-info/meta_info/nomad_meta_info/fhi_aims.nomadmetainfo.json

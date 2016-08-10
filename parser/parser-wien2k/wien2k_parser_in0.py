@@ -5,7 +5,7 @@ from nomadcore.simple_parser import SimpleMatcher as SM
 from nomadcore.local_meta_info import loadJsonFile, InfoKindEl
 import os, sys, json
 
-class Wien2kStructContext(object):
+class Wien2kIn0Context(object):
     """context for wien2k struct parser"""
 
     def __init__(self):
@@ -23,7 +23,7 @@ class Wien2kStructContext(object):
 
 
 # description of the input
-def buildStructureMatchers():
+def buildIn0Matchers():
     return SM(
     name = 'root',
     weak = True,

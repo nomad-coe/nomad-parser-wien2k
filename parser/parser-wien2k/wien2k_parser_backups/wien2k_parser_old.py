@@ -69,19 +69,7 @@ mainFileDescription = SM(
                       SM(r":NATO :\s*(?P<x_wien2k_number_of_independent_atoms>[0-9]+)INDEPENDENT AND\s*(?P<x_wien2k_total_atoms>[0-9]+)\s*TOTAL ATOMS IN UNITCELL"),
                       SM(r"\s*SUBSTANCE: (?P<x_wien2k_system_name>.*)"),
                       SM(r":POT\s*:\s*POTENTIAL OPTION\s*(?P<x_wien2k_potential_option>[0-9]+)"),
-                      SM(r":LAT\s*:\s*LATTICE CONSTANTS=\s*(?P<x_wien2k_lattice_const_a>[0-9.]+)\s*(?P<x_wien2k_lattice_const_b>[0-9.]+)\s*(?P<x_wien2k_lattice_const_c>[0-9.]+)"),
-                      SM(r":VOL\s*:\s*UNIT CELL VOLUME\s*=\s*(?P<x_wien2k_unit_cell_volume__angstrom3>[0-9.]+)"),
-                      SM(r":ENE  : \W*\w*\W*\TOTAL ENERGY IN Ry =\s*(?P<x_wien2k_total_ene>[-+0-9.]+)"),
-                      SM(r":FER  : (\w*\s*)*-\s\w*\W\w*\WM\W*=\s*(?P<x_wien2k_fermi_ene>[-+0-9.]+)"),
-                      SM(r":GAP  : (?P<x_wien2k_ene_gap_Ry>[-+0-9.]+)\s*Ry\s*=\s*(?P<x_wien2k_ene_gap_eV>[-+0-9.]+)\s*eV\s*\W*\w*\s\W"),
-                      SM(r":RKM  : MATRIX SIZE (?P<x_wien2k_matrix_size>[0-9]+)\s*LOs:\s*(?P<x_wien2k_LOs>[0-9.]+)\s*RKM=\s*(?P<x_wien2k_rkm>[0-9.]+)\s*WEIGHT=\s*[0-9.]*\s*\w*:"),
-                      SM(r":MMTOT: TOTAL MAGNETIC MOMENT IN CELL =\s*(?P<x_wien2k_mmtot>[-+0-9.]+)"),
-                      SM(r":MMINT: MAGNETIC MOMENT IN INTERSTITIAL =\s*(?P<x_wien2k_mmint>[-+0-9.]+)"),
-                      SM(r":MMI001: MAGNETIC MOMENT IN SPHERE 1 =\s*(?P<x_wien2k_mmi001>[-+0-9.]+)"),
-                      SM(r":FOR[0-9]*:\s*(?P<x_wien2k_atom_nr>[0-9]+).ATOM\s*(?P<x_wien2k_for_abs>[0-9.]+)\s*(?P<x_wien2k_for_x>[-++0-9.]+)\s*(?P<x_wien2k_for_y>[-++0-9.]+)\s*(?P<x_wien2k_for_z>[-++0-9.]+)\s*partial\sforces", repeats = True),
-                      SM(r":FGL[0-9]*:\s*(?P<x_wien2k_atom_nr>[0-9]+).ATOM\s*(?P<x_wien2k_for_x_gl>[-++0-9.]+)\s*(?P<x_wien2k_for_y_gl>[-++0-9.]+)\s*(?P<x_wien2k_for_z_gl>[-++0-9.]+)\s*partial\sforces", repeats = True),
-                      SM(r":DTO(?P<x_wien2k_atom_nr>[-+0-9]+)[0-9]*:\sTOTAL\s*DIFFERENCE\s*CHARGE\W*\w*\s*IN\s*SPHERE\s*(?P<x_wien2k_sphere_nr>[-+0-9]+)\s*=\s*(?P<x_wien2k_tot_diff_charge>[-+0-9.]+)", repeats = True),
-                      SM(r":CTO\s*:\s*\sTOTAL\s*INTERSTITIAL\s*CHARGE=\s*(?P<x_wien2k_tot_int_charge>[-+0-9.]+)")
+                      SM(r":VOL\s*:\s*UNIT CELL VOLUME\s*=\s*(?P<x_wien2k_unit_cell_volume__angstrom3>[0-9.]+)")
                   ]
               )
            ]

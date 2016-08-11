@@ -29,6 +29,7 @@ object Wien2kParser extends SimpleExternalParserGenerator(
     "parser-wien2k/wien2k_parser.py",
     "parser-wien2k/wien2k_parser_in0.py",
     "parser-wien2k/wien2k_parser_in1c.py",
+    "parser-wien2k/wien2k_parser_in2c.py",
     "parser-wien2k/wien2k_parser_struct.py",
     "parser-wien2k/setup_paths.py",
     "nomad_meta_info/public.nomadmetainfo.json",

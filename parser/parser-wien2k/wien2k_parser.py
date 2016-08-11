@@ -4,7 +4,7 @@ from nomadcore.simple_parser import mainFunction, AncillaryParser, CachingLevel
 from nomadcore.simple_parser import SimpleMatcher as SM
 from nomadcore.local_meta_info import loadJsonFile, InfoKindEl
 import os, sys, json
-import wien2k_parser_struct, wien2k_parser_in0, wien2k_parser_in1c
+import wien2k_parser_struct, wien2k_parser_in0, wien2k_parser_in1c,  wien2k_parser_in2c
 
 class Wien2kContext(object):
     """context for wien2k parser"""
@@ -64,6 +64,19 @@ class Wien2kContext(object):
                 fileDescription = wien2k_parser_in1c.buildIn1cMatchers(),
                 parser = self.parser,
                 cachingLevelForMetaName = wien2k_parser_in1c.get_cachingLevelForMetaName(self.metaInfoEnv, CachingLevel.PreOpenedIgnore),
+                superContext = subSuperContext)
+            with open(fName) as fIn:
+                subParser.parseFile(fIn)
+
+
+        mainFile = self.parser.fIn.fIn.name
+        fName = mainFile[:-4] + ".in2c"
+        if os.path.exists(fName):
+            subSuperContext = wien2k_parser_in2c.Wien2kIn2cContext()
+            subParser = AncillaryParser(
+                fileDescription = wien2k_parser_in2c.buildIn2cMatchers(),
+                parser = self.parser,
+                cachingLevelForMetaName = wien2k_parser_in2c.get_cachingLevelForMetaName(self.metaInfoEnv, CachingLevel.PreOpenedIgnore),
                 superContext = subSuperContext)
             with open(fName) as fIn:
                 subParser.parseFile(fIn)

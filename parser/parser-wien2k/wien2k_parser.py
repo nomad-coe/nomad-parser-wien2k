@@ -121,10 +121,10 @@ mainFileDescription = SM(
                       SM(r":DTO(?P<x_wien2k_atom_nr>[-+0-9]+)[0-9]*:\sTOTAL\s*DIFFERENCE\s*CHARGE\W*\w*\s*IN\s*SPHERE\s*(?P<x_wien2k_sphere_nr>[-+0-9]+)\s*=\s*(?P<x_wien2k_tot_diff_charge>[-+0-9.]+)", repeats = True),
                       SM(r":CTO\s*:\s*\sTOTAL\s*INTERSTITIAL\s*CHARGE=\s*(?P<x_wien2k_tot_int_charge>[-+0-9.]+)"),
                       SM(r":CTO(?P<x_wien2k_atom_nr>[-+0-9]+)[0-9]*:\s*\sTOTAL\s*CHARGE\s*IN\s*SPHERE\s*(?P<x_wien2k_sphere_nr>[-+0-9]+)\s*=\s*(?P<x_wien2k_tot_charge_in_sphere>[-+0-9.]+)",repeats = True),
-                      SM(r":ENE\s*:\s*\W*\w*\W*\s*TOTAL\s*ENERGY\s*IN\s*Ry\s*=\s*(?P<x_wien2k_total_ene>[-+0-9.]+)"),
+                      SM(r":ENE\s*:\s*\W*\w*\W*\s*TOTAL\s*ENERGY\s*IN\s*Ry\s*=\s*(?P<energy_total>[-+0-9.]+)"),
                       SM(r":FOR[0-9]*:\s*(?P<x_wien2k_atom_nr>[0-9]+).ATOM\s*(?P<x_wien2k_for_abs>[0-9.]+)\s*(?P<x_wien2k_for_x>[-++0-9.]+)\s*(?P<x_wien2k_for_y>[-+0-9.]+)\s*(?P<x_wien2k_for_z>[-+0-9.]+)\s*partial\sforces", repeats = True),
-                      SM(r":FGL[0-9]*:\s*(?P<x_wien2k_atom_nr>[0-9]+).ATOM\s*(?P<x_wien2k_for_x_gl>[-+0-9.]+)\s*(?P<x_wien2k_for_y_gl>[-+0-9.]+)\s*(?P<x_wien2k_for_z_gl>[-+0-9.]+)\s*partial\sforces", repeats = True)
-
+                      SM(r":FGL[0-9]*:\s*(?P<x_wien2k_atom_nr>[0-9]+).ATOM\s*(?P<x_wien2k_for_x_gl>[-+0-9.]+)\s*(?P<x_wien2k_for_y_gl>[-+0-9.]+)\s*(?P<x_wien2k_for_z_gl>[-+0-9.]+)\s*partial\sforces", repeats = True),
+                      SM(r":DIS\s*:\s*CHARGE\sDISTANCE\s*\W*[0-9.]+\sfor\satom\s*[0-9]*\sspin\s[0-9]*\W\s*(?P<x_wien2k_charge_distance>[0-9.]+)")
                   ]
               )
            ]

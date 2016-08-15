@@ -28,7 +28,7 @@ class Wien2kStructContext(object):
         labels = []
         pos = []
         for eqAtoms in equiv_atoms:
-            label = eqAtoms["x_wien2k_atom_name"]
+            label = eqAtoms["x_wien2k_atom_name"][0]
             x = eqAtoms["x_wien2k_atom_pos_x"]
             y = eqAtoms["x_wien2k_atom_pos_y"]
             z = eqAtoms["x_wien2k_atom_pos_z"]

@@ -142,6 +142,8 @@ mainFileDescription = SM(
                       SM(r":MMTOT: TOTAL MAGNETIC MOMENT IN CELL =\s*(?P<x_wien2k_mmtot>[-+0-9.]+)"),
                       SM(r":MMINT: MAGNETIC MOMENT IN INTERSTITIAL =\s*(?P<x_wien2k_mmint>[-+0-9.]+)"),
                       SM(r":MMI001: MAGNETIC MOMENT IN SPHERE 1 =\s*(?P<x_wien2k_mmi001>[-+0-9.]+)"),
+                      SM(r":NTO\s*:\s*\sTOTAL\s*INTERSTITIAL\s*CHARGE=\s*(?P<x_wien2k_tot_int_charge_nm>[-+0-9.]+)"),
+                      SM(r":NTO(?P<x_wien2k_atom_nr>[-+0-9]+)[0-9]*:\s*\sTOTAL\s*CHARGE\s*IN\s*SPHERE\s*(?P<x_wien2k_sphere_nr>[-+0-9]+)\s*=\s*(?P<x_wien2k_tot_charge_in_sphere_nm>[-+0-9.]+)",repeats = True),
                       SM(r":DTO(?P<x_wien2k_atom_nr>[-+0-9]+)[0-9]*:\sTOTAL\s*DIFFERENCE\s*CHARGE\W*\w*\s*IN\s*SPHERE\s*(?P<x_wien2k_sphere_nr>[-+0-9]+)\s*=\s*(?P<x_wien2k_tot_diff_charge>[-+0-9.]+)", repeats = True),
                       SM(r":DIS\s*:\s*CHARGE\sDISTANCE\s*\W*[0-9.]+\sfor\satom\s*[0-9]*\sspin\s[0-9]*\W\s*(?P<x_wien2k_charge_distance>[0-9.]+)"),
                       SM(r":CTO\s*:\s*\sTOTAL\s*INTERSTITIAL\s*CHARGE=\s*(?P<x_wien2k_tot_int_charge>[-+0-9.]+)"),

@@ -137,6 +137,7 @@ mainFileDescription = SM(
                       SM(r":VOL\s*:\s*UNIT CELL VOLUME\s*=\s*(?P<x_wien2k_unit_cell_volume_bohr3>[0-9.]+)"),
                       SM(r":RKM  : MATRIX SIZE (?P<x_wien2k_matrix_size>[0-9]+)\s*LOs:\s*(?P<x_wien2k_LOs>[0-9.]+)\s*RKM=\s*(?P<x_wien2k_rkm>[0-9.]+)\s*WEIGHT=\s*[0-9.]*\s*\w*:"),
                       SM(r":KPT\s*:\s*NUMBER\s*OF\s*K-POINTS:\s*(?P<x_wien2k_nr_kpts>[-+0-9.]+)"),
+                      SM(r":GMA\s*:\s*POTENTIAL\sAND\sCHARGE\sCUT-OFF\s*(?P<x_wien2k_cutoff>[0-9.]+)\s*Ry\W\W[0-9.]+"),
                       SM(r":GAP  :\s*(?P<x_wien2k_ene_gap_Ry>[-+0-9.]+)\s*Ry\s*=\s*(?P<x_wien2k_ene_gap_eV>[-+0-9.]+)\s*eV\s*.*"),
                       SM(r":FER  : (\w*\s*)*-\s\w*\W\w*\WM\W*=\s*(?P<x_wien2k_fermi_ene>[-+0-9.]+)"),
                       SM(r":MMTOT: TOTAL MAGNETIC MOMENT IN CELL =\s*(?P<x_wien2k_mmtot>[-+0-9.]+)"),

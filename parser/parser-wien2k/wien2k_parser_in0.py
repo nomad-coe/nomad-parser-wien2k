@@ -5,6 +5,13 @@ from nomadcore.simple_parser import SimpleMatcher as SM
 from nomadcore.local_meta_info import loadJsonFile, InfoKindEl
 import os, sys, json
 
+
+
+################################################################
+# This is the subparser for the WIEN2k input file (.in0)
+################################################################
+
+
 class Wien2kIn0Context(object):
     """context for wien2k struct parser"""
 
@@ -21,6 +28,85 @@ class Wien2kIn0Context(object):
         # allows to reset values if the same superContext is used to parse different files
         self.initialize_values()
 
+def onClose_x_wien2k_section_XC(self, backend, gIndex, section):
+    xc_index = section["x_wien2k_indxc"][0]
+    xc_map_legend = {
+
+        5: ['LDA_C_PW_RPA'],
+        XC_LDA: ['LDA_X_2D'],
+
+        13: ['GGA_X_PBE', 'GGA_C_PBE'],
+        XC_PBE:['GGA_X_PBE', 'GGA_C_PBE'],
+
+        19: ['GGA_X_PBE_SOL', 'GGA_C_PBE_SOL:'],
+        XC_PBESOL: ['GGA_X_PBE_SOL', 'GGA_C_PBE_SOL:'],
+
+        11: ['GGA_X_WC'],
+        XC_WC: ['GGA_X_WC'],
+
+        17: ['GGA_X_PW91'],
+        EC_PW91: ['GGA_X_PW91'],
+        VC_PW91: ['GGA_X_PW91'],
+
+        28: ['MGGA_X_TB09'],
+        XC_MBJ: ['MGGA_X_TB09'],
+
+        29: ['MGGA_C_REVTPSS, GGA_C_REGTPSS'],
+        XC_REVTPSS: ['MGGA_C_REVTPSS, GGA_C_REGTPSS'],
+
+        24: ['GGA_X_B88', 'GGA_C_LYP'],
+        EX_B88: ['GGA_X_B88'],
+        VX_B88: ['GGA_X_B88'],
+        EC_LYP: ['GGA_C_LYP'],
+        VC_LYP: ['GGA_C_LYP'],
+        
+        18: ['HYB_GGA_XC_B3PW91'],
+        XC_B3PW91: ['HYB_GGA_XC_B3PW91'],
+        
+        27: ['MGGA_X_TPSS','MGGA_C_TPSS'],
+        XC_TPSS: ['MGGA_X_TPSS','MGGA_C_TPSS'],
+
+        46:['GGA_X_HTBS'],
+        XC_HTBS: ['GGA_X_HTBS'], 
+
+        47: ['HYB_GGA_XC_B3LYP'],
+        XC_B3LYP: ['HYB_GGA_XC_B3LYP'],
+
+        
+#        51: ['-'],
+#        EX_SLDA:
+#        VX_SLDA:
+
+#        52: ['-'],
+#        EX_SPBE: 
+#        VX_SPBE:
+        
+#        53: ['-'],
+#        EX_SWC: 
+#        VX_SWC:
+        
+#        54: ['-'],
+#        EX_SPBESOL: 
+#        VX_SPBESOL:
+        
+#        55: ['-'],
+#        EX_SB88:
+#        VX_SB88:
+
+        6: ['HF_X'],
+        EX_LDA: ['HF_X'],
+        VX_LDA: ['HF_X']
+        }
+
+#        # Push the functional string into the backend
+#        xc_map_legend = functionalMap.get(indxc)
+#        if not xc_map_legend:
+#            raise Exception("Unhandled xc functional %s found" % functional)
+    
+    for xc_name in xc_map_legend[xc_index]:
+      s = backend.openSection("section_XC_functionals")
+      backend.addValue("XC_functional_name", xc_name)
+      backend.closeSection("section_XC_functionals", s)
 
 # description of the input
 def buildIn0Matchers():
@@ -28,25 +114,15 @@ def buildIn0Matchers():
     name = 'root',
     weak = True,
     startReStr = "",
-        sections = ["section_run", "section_method"],
+        sections = ["section_run", "section_method", "section_XC_functionals"],
     subMatchers = [
 #        SM(name = 'systemName',
 #          startReStr = r"(?P<x_wien2k_system_nameIn>.*)"),
-        SM(r"(?P<x_wien2k_switch>\w*)\s*(?P<x_wien2k_indxc>[0-9]+)\s*.*"),
+        SM(r"(?P<x_wien2k_switch>\w*)\s*(?P<x_wien2k_indxc>\w*)\s*.*",sections = ['x_wien2k_section_XC']),
         SM(r"\s*(?P<x_wien2k_ifft_x>[0-9]+)\s*(?P<x_wien2k_ifft_y>[0-9]+)\s*(?P<x_wien2k_ifft_z>[0-9]+)\s*(?P<x_wien2k_ifft_factor>[0-9.]+)\s*(?P<x_wien2k_iprint>[0-9]+).*")
-#        SM(r"(?P<x_wien2k_calc_mode>.*)"),
-#        SM(r"\s*(?P<x_wien2k_unit_cell_param_a>[-+0-9]*\.\d{0,6}){0,10}\s*(?P<x_wien2k_unit_cell_param_b>[-+0-9]*\.\d{0,6}){0,10}\s*(?P<x_wien2k_unit_cell_param_c>[-+0-9]*\.\d{0,6}){0,10}\s*(?P<x_wien2k_angle_between_unit_axis_alfa>[-+]?[0-9]*\.\d{0,6}){0,10}\s*(?P<x_wien2k_angle_between_unit_axis_beta>[-+]?[0-9]*\.\d{0,6}){0,10}\s*(?P<x_wien2k_angle_between_unit_axis_gamma>[-+]?[0-9]*\.\d*)"),
-#        SM(r"\s*ATOM\s*[-0-9]+:\s*X=(?P<x_wien2k_atom_pos_x>[-+0-9.eEdD]+)\s*Y=(?P<x_wien2k_atom_pos_y>[-+0-9.eEdD]+)\s*Z=(?P<x_wien2k_atom_pos_z>[-+0-9.eEdD]+)",
-#           repeats=True,
-#           sections=["x_wien2k_section_equiv_atoms"],
-#           subMatchers=[
-#               SM(r"\s*[-0-9]+:\s*X=(?P<x_wien2k_atom_pos_x>[-+0-9.eEdD]+)\s*Y=(?P<x_wien2k_atom_pos_y>[-+0-9.eEdD]+)\s*Z=(?P<x_wien2k_atom_pos_z>[-+0-9.eEdD]+)",
-#                  repeats=True
-#              ),
-#               SM(r"\s*(?P<x_wien2k_atom_name>^.+)\s*NPT=\s*(?P<x_wien2k_NPT>[0-9]+)\s*R0=(?P<x_wien2k_R0>[0-9.]+)\s*RMT=\s*(?P<x_wien2k_RMT>[0-9.]+)\s*Z:\s*(?P<x_wien2k_atomic_number_Z>[0-9.]+)",)
-#           ]
-#       )
     ])
+
+
 
 def get_cachingLevelForMetaName(metaInfoEnv, CachingLvl):
     """Sets the caching level for the metadata.

@@ -6,6 +6,12 @@ from nomadcore.local_meta_info import loadJsonFile, InfoKindEl
 import os, sys, json
 import wien2k_parser_struct, wien2k_parser_in0, wien2k_parser_in1c,  wien2k_parser_in2c, wien2k_parser_in1,  wien2k_parser_in2
 
+
+################################################################
+# This is the parser for the main output file (.scp) of WIEN2k.
+################################################################
+
+
 class Wien2kContext(object):
     """context for wien2k parser"""
 
@@ -163,7 +169,8 @@ mainFileDescription = SM(
 # loading metadata from nomad-meta-info/meta_info/nomad_meta_info/fhi_aims.nomadmetainfo.json
 
 parserInfo = {
-  "name": "Wien2k"
+  "name": "Wien2k",
+  "version": "1.0"
 }
 
 metaInfoPath = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)),"../../../../nomad-meta-info/meta_info/nomad_meta_info/wien2k.nomadmetainfo.json"))

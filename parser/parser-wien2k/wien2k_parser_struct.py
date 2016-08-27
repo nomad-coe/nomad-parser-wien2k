@@ -6,6 +6,12 @@ from nomadcore.local_meta_info import loadJsonFile, InfoKindEl
 import os, sys, json, logging
 import numpy as np
 
+
+################################################################
+# This is the subparser for the main WIEN2k input file (.struct)
+################################################################
+
+
 class Wien2kStructContext(object):
     """context for wien2k struct parser"""
 

@@ -3,7 +3,8 @@ import setup_paths
 from nomadcore.simple_parser import mainFunction, CachingLevel
 from nomadcore.simple_parser import SimpleMatcher as SM
 from nomadcore.local_meta_info import loadJsonFile, InfoKindEl
-import os, sys, json
+import os, sys, json, logging
+import numpy as np
 
 class Wien2kStructContext(object):
     """context for wien2k struct parser"""
@@ -20,6 +21,25 @@ class Wien2kStructContext(object):
         self.parser = parser
         # allows to reset values if the same superContext is used to parse different files
         self.initialize_values()
+
+    def onClose_section_system(self, backend, gIndex, section):
+        equiv_atoms = section["x_wien2k_section_equiv_atoms"]
+        #logging.error("section: %s", section)
+        labels = []
+        pos = []
+        for eqAtoms in equiv_atoms:
+            label = eqAtoms["x_wien2k_atom_name"][0]
+            x = eqAtoms["x_wien2k_atom_pos_x"]
+            y = eqAtoms["x_wien2k_atom_pos_y"]
+            z = eqAtoms["x_wien2k_atom_pos_z"]
+            if len(x) != len(y) or len(x) != len(z):
+                raise Exception("incorrect parsing, different number of x,y,z components")
+            groupPos = [[x[i],y[i],z[i]] for i in range(len(x))]
+            nAt = len(groupPos)
+            labels += [label for i in range(nAt)]
+            pos += groupPos
+        backend.addValue("atom_labels", labels)
+        backend.addValue("atom_positions", pos)
 
 
 # description of the input
@@ -66,6 +86,7 @@ def get_cachingLevelForMetaName(metaInfoEnv, CachingLvl):
                                'section_system': CachingLvl
                               }
     cachingLevelForMetaName["x_wien2k_system_nameIn"] = CachingLevel.ForwardAndCache
+    cachingLevelForMetaName["x_wien2k_section_equiv_atoms"] = CachingLevel.ForwardAndCache
     return cachingLevelForMetaName
 
 # loading metadata from nomad-meta-info/meta_info/nomad_meta_info/fhi_aims.nomadmetainfo.json

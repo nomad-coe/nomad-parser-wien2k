@@ -5,6 +5,12 @@ from nomadcore.simple_parser import SimpleMatcher as SM
 from nomadcore.local_meta_info import loadJsonFile, InfoKindEl
 import os, sys, json
 
+
+################################################################
+# This is the subparser for the WIEN2k input file (.in1)
+################################################################
+
+
 class Wien2kIn1Context(object):
     """context for wien2k struct parser"""
 

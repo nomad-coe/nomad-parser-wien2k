@@ -8,7 +8,7 @@ import wien2k_parser_struct, wien2k_parser_in0, wien2k_parser_in1c,  wien2k_pars
 
 
 ################################################################
-# This is the parser for the main output file (.scp) of WIEN2k.
+# This is the parser for the main output file (.scf) of WIEN2k.
 ################################################################
 
 

@@ -21,6 +21,10 @@ class Wien2kContext(object):
     def initialize_values(self):
         """allows to reset values if the same superContext is used to parse different files"""
         self.metaInfoEnv = self.parser.parserBuilder.metaInfoEnv
+        self.rootSecMethodIndex = None
+        self.secMethodIndex = None
+        self.secSystemIndex = None
+        self.scfIterNr = 0
 
     def startedParsing(self, path, parser):
         """called when parsing starts"""
@@ -112,6 +116,75 @@ class Wien2kContext(object):
             with open(fName) as fIn:
                 subParser.parseFile(fIn)
 
+        #if self.secMethodIndex is None:
+        if self.rootSecMethodIndex is None:
+            self.rootSecMethodIndex = gIndex
+        self.secMethodIndex = gIndex
+#        self.secMethodIndex["single_configuration_to_calculation_method_ref"] = gIndex
+
+
+    def onClose_section_single_configuration_calculation(self, backend, gIndex, section):
+       # write number of SCF iterations
+        backend.addValue('number_of_scf_iterations', self.scfIterNr)
+        # write the references to section_method and section_system
+        backend.addValue('single_configuration_to_calculation_method_ref', self.secMethodIndex)
+        backend.addValue('single_configuration_calculation_to_system_ref', self.secSystemIndex)
+
+
+    def onOpen_section_system(self, backend, gIndex, section):
+        #if self.secSystemIndex is None:
+        self.secSystemIndex = gIndex
+#        self.secSystemIndex["single_configuration_calculation_to_system_ref"] = gIndex
+
+    def onClose_section_system(self, backend, gIndex, section):
+
+        #backend.addValue("smearing_kind", x_fleur_smearing_kind)
+        smear_kind = section['x_wien2k_smearing_kind']
+        if smear_kind is not None:
+        #    value = ''
+            backend.addValue('x_wien2k_smearing_kind', value)
+
+
+        smear_width = section['x_wien2k_smearing_width']
+        if smear_width is not None:
+        #    value = ''
+            backend.addValue('x_wien2k_smearing_width', value)
+
+        #   atom labels
+        atom_labels = section['x_wien2k_atom_name']
+        if atom_labels is not None:
+           backend.addArrayValues('atom_labels', np.asarray(atom_labels))
+    
+        
+        # atom force
+        atom_force = []
+        for i in ['x', 'y', 'z']:
+            api = section['x_wien2k_for_' + i]
+            if api is not None:
+               atom_force.append(api)
+        if atom_force:
+            # need to transpose array since its shape is [number_of_atoms,3] in\the metadata
+           backend.addArrayValues('atom_forces', np.transpose(np.asarray(atom_force)))
+
+        #   unit_cell
+        unit_cell = []
+        for i in ['a', 'b', 'c']:
+            uci = section['x_wien2k_unit_cell_param_' + i]
+            if uci is not None:
+                unit_cell.append(uci)
+        if unit_cell:
+           backend.addArrayValues('simulation_cell', np.asarray(unit_cell))
+           backend.addArrayValues("configuration_periodic_dimensions", np.ones(3, dtype=bool))
+
+
+
+
+    def onClose_section_scf_iteration(self, backend, gIndex, section):
+        #Trigger called when section_scf_iteration is closed.
+        
+        # count number of SCF iterations
+        self.scfIterNr += 1
+
 # description of the input
 mainFileDescription = SM(
     name = 'root',
@@ -169,6 +242,16 @@ mainFileDescription = SM(
            ]
        )
     ])
+
+
+# which values to cache or forward (mapping meta name -> CachingLevel)
+
+cachingLevelForMetaName = {
+
+    "XC_functional_name": CachingLevel.ForwardAndCache,
+    "energy_total": CachingLevel.ForwardAndCache
+    
+ }
 
 # loading metadata from nomad-meta-info/meta_info/nomad_meta_info/fhi_aims.nomadmetainfo.json
 

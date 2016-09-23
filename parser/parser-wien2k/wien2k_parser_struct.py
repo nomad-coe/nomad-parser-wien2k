@@ -46,8 +46,23 @@ class Wien2kStructContext(object):
             pos += groupPos
         backend.addValue("atom_labels", labels)
         backend.addValue("atom_positions", pos)
+##OR
+"""
+        #   atom_positions
+        atom_pos = []
+        for i in ['x', 'y', 'z']:
+            api = section['x_wien2k_atom_pos_' + i]
+            if api is not None:
+               atom_pos.append(api)
+        if atom_pos:
+            # need to transpose array since its shape is [number_of_atoms,3] in the metadata
+           backend.addArrayValues('atom_positions', np.transpose(np.asarray(atom_pos)))
 
-
+         #   atom labels
+        atom_labels = section['x_wien2k_atom_name']
+        if atom_labels is not None:
+           backend.addArrayValues('atom_labels', np.asarray(atom_labels))
+"""
 # description of the input
 def buildStructureMatchers():
     return SM(
@@ -93,6 +108,7 @@ def get_cachingLevelForMetaName(metaInfoEnv, CachingLvl):
                               }
     cachingLevelForMetaName["x_wien2k_system_nameIn"] = CachingLevel.ForwardAndCache
     cachingLevelForMetaName["x_wien2k_section_equiv_atoms"] = CachingLevel.ForwardAndCache
+    cachingLevelForMetaName["atom_labels"] = CachingLevel.ForwardAndCache
     return cachingLevelForMetaName
 
 # loading metadata from nomad-meta-info/meta_info/nomad_meta_info/fhi_aims.nomadmetainfo.json

@@ -12,7 +12,7 @@ import os, sys, json
 
 
 class Wien2kIn2cContext(object):
-    """context for wien2k struct parser"""
+    """context for wien2k In2c parser"""
 
     def __init__(self):
         self.parser = None

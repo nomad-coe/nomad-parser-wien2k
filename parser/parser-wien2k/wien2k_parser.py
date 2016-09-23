@@ -38,6 +38,7 @@ class Wien2kContext(object):
                          section["x_wien2k_release_date"][0])
 
     def onOpen_section_system(self, backend, gIndex, section):
+        self.secSystemIndex = gIndex
         mainFile = self.parser.fIn.fIn.name
         fName = mainFile[:-4] + ".struct"
         if os.path.exists(fName):
@@ -130,11 +131,6 @@ class Wien2kContext(object):
         backend.addValue('single_configuration_to_calculation_method_ref', self.secMethodIndex)
         backend.addValue('single_configuration_calculation_to_system_ref', self.secSystemIndex)
 
-
-    def onOpen_section_system(self, backend, gIndex, section):
-        #if self.secSystemIndex is None:
-        self.secSystemIndex = gIndex
-#        self.secSystemIndex["single_configuration_calculation_to_system_ref"] = gIndex
 
     def onClose_section_system(self, backend, gIndex, section):
 

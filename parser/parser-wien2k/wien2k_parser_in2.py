@@ -40,7 +40,7 @@ def buildIn2Matchers():
 #          startReStr = r"(?P<x_wien2k_system_nameIn>.*)"),
         SM(r"\s*(?P<x_wien2k_in2c_switch>[A-Z]+)\s*.*"),
         SM(r"\s*(?P<x_wien2k_in2c_emin>[-+0-9.]+)\s*(?P<x_wien2k_in2c_ne>[-+0-9.]+)\s*(?P<x_wien2k_in2c_espermin>[-+0-9.]+)\s*(?P<x_wien2k_in2c_esper0>[-+0-9.]+)\s*.*"),
-        SM(r"\s*(?P<smearing_kind>[A-Z]+)\s*\s*(?P<smearing_width>[-+0-9.]+)\s*.*"),
+        SM(r"\s*(?P<x_wien2k_smearing_kind>[A-Z]+)\s*\s*(?P<x_wien2k_smearing_width__rydberg>[-+0-9.]+)\s*.*"),
         SM(r"\s*(?P<x_wien2k_in2c_gmax>[-+0-9.]+)\s*GMAX")
 
     ])

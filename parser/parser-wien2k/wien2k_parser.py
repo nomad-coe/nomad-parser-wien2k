@@ -135,14 +135,14 @@ class Wien2kContext(object):
     def onClose_section_system(self, backend, gIndex, section):
 
         #backend.addValue("smearing_kind", x_fleur_smearing_kind)
-        smear_kind = section['x_wien2k_smearing_kind']
-        if smear_kind is not None:
+        smearing_kind = section['x_wien2k_smearing_kind']
+        if smearing_kind is not None:
         #    value = ''
             backend.addValue('x_wien2k_smearing_kind', value)
 
 
-        smear_width = section['x_wien2k_smearing_width']
-        if smear_width is not None:
+        smearing_width = section['x_wien2k_smearing_width']
+        if smearing_width is not None:
         #    value = ''
             backend.addValue('x_wien2k_smearing_width', value)
 
@@ -212,6 +212,7 @@ mainFileDescription = SM(
                       SM(r":VOL\s*:\s*UNIT CELL VOLUME\s*=\s*(?P<x_wien2k_unit_cell_volume_bohr3>[0-9.]+)"),
                       SM(r":RKM  : MATRIX SIZE (?P<x_wien2k_matrix_size>[0-9]+)\s*LOs:\s*(?P<x_wien2k_LOs>[0-9.]+)\s*RKM=\s*(?P<x_wien2k_rkm>[0-9.]+)\s*WEIGHT=\s*[0-9.]*\s*\w*:"),
                       SM(r":KPT\s*:\s*NUMBER\s*OF\s*K-POINTS:\s*(?P<x_wien2k_nr_kpts>[-+0-9.]+)"),
+                      #SM(r":GMA\s*:\s*POTENTIAL\sAND\sCHARGE\sCUT-OFF\s*(?P<x_wien2k_cutoff>[0-9.]+)\s*Ry\*\*[0-9.]+"),
                       SM(r":GMA\s*:\s*POTENTIAL\sAND\sCHARGE\sCUT-OFF\s*(?P<x_wien2k_cutoff>[0-9.]+)\s*Ry\W\W[0-9.]+"),
                       SM(r":GAP\s*:\s*(?P<x_wien2k_ene_gap_Ry>[-+0-9.]+)\s*Ry\s*=\s*(?P<x_wien2k_ene_gap_eV>[-+0-9.]+)\s*eV\s*.*"),
                       SM(r":NOE\s*:\s*NUMBER\sOF\sELECTRONS\s*=\s*(?P<x_wien2k_noe>[0-9.]+)"),

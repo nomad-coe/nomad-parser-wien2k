@@ -30,7 +30,7 @@ class Wien2kIn0Context(object):
 
     def onClose_x_wien2k_section_XC(self, backend, gIndex, section):
         xc_index = section["x_wien2k_indxc"]   #[0]
-        # logging.error("winsectxc: %s -> %s", section, xc_index)
+        #logging.error("winsectxc: %s -> %s", section, xc_index)
         if not xc_index:
             xc_index = ["XC_PBE"]
         xc_map_legend = {
@@ -41,8 +41,8 @@ class Wien2kIn0Context(object):
             '13': ['GGA_X_PBE', 'GGA_C_PBE'],
             'XC_PBE':['GGA_X_PBE', 'GGA_C_PBE'],
 
-            '19': ['GGA_X_PBE_SOL', 'GGA_C_PBE_SOL:'],
-            'XC_PBESOL': ['GGA_X_PBE_SOL', 'GGA_C_PBE_SOL:'],
+            '19': ['GGA_X_PBE_SOL', 'GGA_C_PBE_SOL'],
+            'XC_PBESOL': ['GGA_X_PBE_SOL', 'GGA_C_PBE_SOL'],
 
             '11': ['GGA_X_WC'],
             'XC_WC': ['GGA_X_WC'],

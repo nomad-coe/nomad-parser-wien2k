@@ -3,7 +3,7 @@ import setup_paths
 from nomadcore.simple_parser import mainFunction, AncillaryParser, CachingLevel
 from nomadcore.simple_parser import SimpleMatcher as SM
 from nomadcore.local_meta_info import loadJsonFile, InfoKindEl
-import os, sys, json
+import os, sys, json, logging
 import wien2k_parser_struct, wien2k_parser_in0, wien2k_parser_in1c,  wien2k_parser_in2c, wien2k_parser_in1,  wien2k_parser_in2
 
 
@@ -39,18 +39,6 @@ class Wien2kContext(object):
 
     def onOpen_section_system(self, backend, gIndex, section):
         self.secSystemIndex = gIndex
-        mainFile = self.parser.fIn.fIn.name
-        fName = mainFile[:-4] + ".struct"
-        if os.path.exists(fName):
-            structSuperContext = wien2k_parser_struct.Wien2kStructContext()
-            structParser = AncillaryParser(
-                fileDescription = wien2k_parser_struct.buildStructureMatchers(),
-                parser = self.parser,
-                cachingLevelForMetaName = wien2k_parser_struct.get_cachingLevelForMetaName(self.metaInfoEnv, CachingLevel.PreOpenedIgnore),
-                superContext = structSuperContext)
-
-            with open(fName) as fIn:
-                structParser.parseFile(fIn)
 
     def onOpen_section_method(self, backend, gIndex, section):
 
@@ -141,10 +129,10 @@ class Wien2kContext(object):
             backend.addValue('x_wien2k_smearing_kind', value)
 
 
-        smearing_width = section['x_wien2k_smearing_width__rydberg']
+        smearing_width = section['x_wien2k_smearing_width']
         if smearing_width is not None:
         #    value = ''
-            backend.addValue('x_wien2k_smearing_width__rydberg', value)
+            backend.addValue('x_wien2k_smearing_width', value)
 
         #   atom labels
         atom_labels = section['x_wien2k_atom_name']
@@ -162,15 +150,18 @@ class Wien2kContext(object):
             # need to transpose array since its shape is [number_of_atoms,3] in\the metadata
            backend.addArrayValues('atom_forces', np.transpose(np.asarray(atom_force)))
 
-        #   unit_cell
-        unit_cell = []
-        for i in ['a', 'b', 'c']:
-            uci = section['x_wien2k_unit_cell_param_' + i]
-            if uci is not None:
-                unit_cell.append(uci)
-        if unit_cell:
-           backend.addArrayValues('simulation_cell', np.asarray(unit_cell))
-           backend.addArrayValues("configuration_periodic_dimensions", np.ones(3, dtype=bool))
+        mainFile = self.parser.fIn.fIn.name
+        fName = mainFile[:-4] + ".struct"
+        if os.path.exists(fName):
+            structSuperContext = wien2k_parser_struct.Wien2kStructContext()
+            structParser = AncillaryParser(
+                fileDescription = wien2k_parser_struct.buildStructureMatchers(),
+                parser = self.parser,
+                cachingLevelForMetaName = wien2k_parser_struct.get_cachingLevelForMetaName(self.metaInfoEnv, CachingLevel.PreOpenedIgnore),
+                superContext = structSuperContext)
+
+            with open(fName) as fIn:
+                structParser.parseFile(fIn)
 
 
 

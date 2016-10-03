@@ -5,6 +5,7 @@ from nomadcore.simple_parser import SimpleMatcher as SM
 from nomadcore.local_meta_info import loadJsonFile, InfoKindEl
 import os, sys, json, logging
 import numpy as np
+import ase.geometry
 
 
 ################################################################
@@ -29,15 +30,32 @@ class Wien2kStructContext(object):
         self.initialize_values()
 
     def onClose_section_system(self, backend, gIndex, section):
+        #   unit_cell
+        unit_cell_params = []
+        for i in ['a', 'b', 'c']:
+            uci = section['x_wien2k_unit_cell_param_' + i]
+            #if uci is not None:
+            unit_cell_params.append(uci[0])
+        for i in ['alfa', 'beta', 'gamma']:
+            uci = section['x_wien2k_angle_between_unit_axis_' + i]
+            # if uci is not None:
+            unit_cell_params.append(uci[0])
+
+        unit_cell = ase.geometry.cellpar_to_cell(unit_cell_params)
+        backend.addArrayValues('simulation_cell', unit_cell)
+        backend.addArrayValues("configuration_periodic_dimensions", np.ones(3, dtype=bool))
+
         equiv_atoms = section["x_wien2k_section_equiv_atoms"]
         #logging.error("section: %s", section)
         labels = []
         pos = []
+
         for eqAtoms in equiv_atoms:
             label = eqAtoms["x_wien2k_atom_name"][0]
             x = eqAtoms["x_wien2k_atom_pos_x"]
             y = eqAtoms["x_wien2k_atom_pos_y"]
             z = eqAtoms["x_wien2k_atom_pos_z"]
+            #OB            logging.error("equiv_atoms: %s x %s y %s z %s",eqAtoms, x, y, z)
             if len(x) != len(y) or len(x) != len(z):
                 raise Exception("incorrect parsing, different number of x,y,z components")
             groupPos = [[x[i],y[i],z[i]] for i in range(len(x))]
@@ -45,24 +63,12 @@ class Wien2kStructContext(object):
             labels += [label for i in range(nAt)]
             pos += groupPos
         backend.addValue("atom_labels", labels)
-        backend.addValue("atom_positions", pos)
-##OR
-"""
-        #   atom_positions
-        atom_pos = []
-        for i in ['x', 'y', 'z']:
-            api = section['x_wien2k_atom_pos_' + i]
-            if api is not None:
-               atom_pos.append(api)
-        if atom_pos:
-            # need to transpose array since its shape is [number_of_atoms,3] in the metadata
-           backend.addArrayValues('atom_positions', np.transpose(np.asarray(atom_pos)))
+        #backend.addValue("atom_positions", np.dot(pos,unit_cell))
+        #ok#backend.addArrayValues('atom_positions', np.transpose(np.asarray(pos)))
+        backend.addArrayValues('atom_positions', np.asarray(pos))
 
-         #   atom labels
-        atom_labels = section['x_wien2k_atom_name']
-        if atom_labels is not None:
-           backend.addArrayValues('atom_labels', np.asarray(atom_labels))
-"""
+
+
 # description of the input
 def buildStructureMatchers():
     return SM(
@@ -76,12 +82,12 @@ def buildStructureMatchers():
         SM(r"\w+\s*LATTICE,NONEQUIV\.ATOMS.\s*(?P<x_wien2k_nonequiv_atoms>[0-9]+)"),
         SM(r"(?P<x_wien2k_calc_mode>.*)"),
        # SM(r"\s*(?P<x_wien2k_unit_cell_param_a>[-+0-9.eEdD]+)\s*(?P<x_wien2k_unit_cell_param_b>[-+0-9.eEdD]+)\s*(?P<x_wien2k_unit_cell_param_c>[-+0-9.eEdD]+)\s*(?P<x_wien2k_angle_between_unit_axis_alfa>[-+0-9.eEdD]{9})\s*(?P<x_wien2k_angle_between_unit_axis_beta>[-+0-9.eEdD]{9})\s*(?P<x_wien2k_angle_between_unit_axis_gamma>[-+0-9.eEdD]+)"),
-        SM(r"\s*(?P<x_wien2k_unit_cell_param_a>[-+0-9]*\.\d{0,6}){0,10}\s*(?P<x_wien2k_unit_cell_param_b>[-+0-9]*\.\d{0,6}){0,10}\s*(?P<x_wien2k_unit_cell_param_c>[-+0-9]*\.\d{0,6}){0,10}\s*(?P<x_wien2k_angle_between_unit_axis_alfa>[-+]?[0-9]*\.\d{0,6}){0,10}\s*(?P<x_wien2k_angle_between_unit_axis_beta>[-+]?[0-9]*\.\d{0,6}){0,10}\s*(?P<x_wien2k_angle_between_unit_axis_gamma>[-+]?[0-9]*\.\d*)"),
-        SM(r"\s*ATOM\s*[-0-9]+:\s*X=(?P<x_wien2k_atom_pos_x>[-+0-9.eEdD]+)\s*Y=(?P<x_wien2k_atom_pos_y>[-+0-9.eEdD]+)\s*Z=(?P<x_wien2k_atom_pos_z>[-+0-9.eEdD]+)",
+        SM(r"\s*(?P<x_wien2k_unit_cell_param_a__angstrom>[-+0-9]*\.\d{0,6}){0,10}\s*(?P<x_wien2k_unit_cell_param_b__angstrom>[-+0-9]*\.\d{0,6}){0,10}\s*(?P<x_wien2k_unit_cell_param_c__angstrom>[-+0-9]*\.\d{0,6}){0,10}\s*(?P<x_wien2k_angle_between_unit_axis_alfa>[-+]?[0-9]*\.\d{0,6}){0,10}\s*(?P<x_wien2k_angle_between_unit_axis_beta>[-+]?[0-9]*\.\d{0,6}){0,10}\s*(?P<x_wien2k_angle_between_unit_axis_gamma>[-+]?[0-9]*\.\d*)"),
+        SM(r"\s*ATOM\s*[-0-9]+:\s*X=(?P<x_wien2k_atom_pos_x__angstrom>[-+0-9.eEdD]+)\s*Y=(?P<x_wien2k_atom_pos_y__angstrom>[-+0-9.eEdD]+)\s*Z=(?P<x_wien2k_atom_pos_z__angstrom>[-+0-9.eEdD]+)",
            repeats=True,
            sections=["x_wien2k_section_equiv_atoms"],
            subMatchers=[
-               SM(r"\s*[-0-9]+:\s*X=(?P<x_wien2k_atom_pos_x>[-+0-9.eEdD]+)\s*Y=(?P<x_wien2k_atom_pos_y>[-+0-9.eEdD]+)\s*Z=(?P<x_wien2k_atom_pos_z>[-+0-9.eEdD]+)",
+               SM(r"\s*[-0-9]+:\s*X=(?P<x_wien2k_atom_pos_x__angstrom>[-+0-9.eEdD]+)\s*Y=(?P<x_wien2k_atom_pos_y__angstrom>[-+0-9.eEdD]+)\s*Z=(?P<x_wien2k_atom_pos_z__angstrom>[-+0-9.eEdD]+)",
                   repeats=True
               ),
     #           SM(r"\s*(?P<atom>.{10})\s*NPT=\s*(?P<NPT>[0-9]+)\s*R0=(?P<r0>[0-9.]+)\s*RMT=\s*(?P<rmt>[0-9.]+)\s*Z:\s*(?P<z>[0-9.]+)",)

@@ -55,7 +55,7 @@ class Wien2kStructContext(object):
             x = eqAtoms["x_wien2k_atom_pos_x"]
             y = eqAtoms["x_wien2k_atom_pos_y"]
             z = eqAtoms["x_wien2k_atom_pos_z"]
-            #OB            logging.error("equiv_atoms: %s x %s y %s z %s",eqAtoms, x, y, z)
+            #logging.error("equiv_atoms: %s x %s y %s z %s",eqAtoms, x, y, z)
             if len(x) != len(y) or len(x) != len(z):
                 raise Exception("incorrect parsing, different number of x,y,z components")
             groupPos = [[x[i],y[i],z[i]] for i in range(len(x))]
@@ -63,8 +63,9 @@ class Wien2kStructContext(object):
             labels += [label for i in range(nAt)]
             pos += groupPos
         backend.addValue("atom_labels", labels)
-        #backend.addValue("atom_positions", np.dot(pos,unit_cell))
-        #ok#backend.addArrayValues('atom_positions', np.transpose(np.asarray(pos)))
+
+        #backend.addArrayValues("atom_positions", np.dot(pos,unit_cell))
+        #backend.addArrayValues('atom_positions', np.transpose(np.asarray(pos)))
         backend.addArrayValues('atom_positions', np.asarray(pos))
 
 

@@ -207,7 +207,7 @@ mainFileDescription = SM(
                       SM(r":GMA\s*:\s*POTENTIAL\sAND\sCHARGE\sCUT-OFF\s*(?P<x_wien2k_cutoff>[0-9.]+)\s*Ry\W\W[0-9.]+"),
                       SM(r":GAP\s*:\s*(?P<x_wien2k_ene_gap__rydberg>[-+0-9.]+)\s*Ry\s*=\s*(?P<x_wien2k_ene_gap_eV>[-+0-9.]+)\s*eV\s*.*"),
                       SM(r":NOE\s*:\s*NUMBER\sOF\sELECTRONS\s*=\s*(?P<x_wien2k_noe>[0-9.]+)"),
-                      SM(r":FER\s*:\s(\w*\s*)*-\s\w*\W\w*\WM\W*=\s*(?P<x_wien2k_fermi_ene>[-+0-9.]+)"),
+                      SM(r":FER\s*:\s(\w*\s*)*-\s\w*\W\w*\WM\W*=\s*(?P<x_wien2k_fermi_ene__rydberg>[-+0-9.]+)"),
                       SM(r":GMA\s*:\s*POTENTIAL\sAND\sCHARGE\sCUT-OFF\s*[0-9.]+\s*Ry\W\W[0-9.]+"),
                       SM(r":CHA(?P<x_wien2k_atom_nr>[-+0-9]+):\s*TOTAL\s*\w*\s*CHARGE INSIDE SPHERE\s*(?P<x_wien2k_sphere_nr>[-+0-9]+)\s*=\s*(?P<x_wien2k_tot_val_charge_sphere>[0-9.]+)",repeats = True),
                       SM(r":CHA\s*:\s*TOTAL\s*\w*\s*CHARGE INSIDE\s*\w*\s*CELL\s=\s*(?P<x_wien2k_tot_val_charge_cell>[-+0-9.]+)"),

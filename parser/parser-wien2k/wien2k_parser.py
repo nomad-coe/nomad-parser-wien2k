@@ -1,5 +1,6 @@
 from builtins import object
 import setup_paths
+import numpy as np
 from nomadcore.simple_parser import mainFunction, AncillaryParser, CachingLevel
 from nomadcore.simple_parser import SimpleMatcher as SM
 from nomadcore.local_meta_info import loadJsonFile, InfoKindEl
@@ -178,7 +179,7 @@ class Wien2kContext(object):
             with open(fName) as fIn:
                 structParser.parseFile(fIn)
 
-
+        backend.addArrayValues('configuration_periodic_dimensions', np.asarray([True, True, True]))
 
 
     def onClose_section_scf_iteration(self, backend, gIndex, section):

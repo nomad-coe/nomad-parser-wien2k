@@ -49,9 +49,15 @@ class Wien2kContext(object):
         self.initialize_values()
 
     def onClose_x_wien2k_header(self, backend, gIndex, section):
-        backend.addValue("program_version",
-                         section["x_wien2k_version"][0] + " " +
-                         section["x_wien2k_release_date"][0])
+        version_check = section["x_wien2k_version"]
+#        riprova = section["x_wien2k_release_date"][0]
+#        print("prova=",prova," riprova=",riprova)
+        if version_check:
+            backend.addValue("program_version",
+                             section["x_wien2k_version"][0] + " " +
+                             section["x_wien2k_release_date"][0])
+        else:
+            backend.addValue("program_version", "Before_wien2k11")
 
     def onOpen_section_system(self, backend, gIndex, section):
         self.secSystemIndex = gIndex
@@ -193,20 +199,21 @@ mainFileDescription = SM(
     name = 'root',
     weak = True,
     startReStr = "",
+    sections   = ['section_run','x_wien2k_header'],
     subMatchers = [
+        SM(r"\s*:LABEL[0-9]+: using WIEN2k_(?P<x_wien2k_version>[0-9.]+) \(Release (?P<x_wien2k_release_date>[0-9/.]+)\) in "),
         SM(name = 'newRun',
-           startReStr = r"\s*:LABEL[0-9]+: using WIEN2k_(?:[0-9.]+) \(Release (?:[0-9/.]+)\) in ",
+#           subMatchers=[
+#           SM(r"\s*:LABEL[0-9]+: using WIEN2k_(?P<x_wien2k_version>[0-9.]+) \(Release (?P<x_wien2k_release_date>[0-9/.]+)\) in ")
+#           ],
+           startReStr = r"\s*:ITE[0-9]+:\s*[0-9]+.\s*ITERATION",
            repeats = True,
            required = True,
            forwardMatch = True,
-           sections   = ['section_run', 'section_method', 'section_system', 'section_single_configuration_calculation'],
+           sections   = ['section_method', 'section_system', 'section_single_configuration_calculation'],
+           fixedStartValues={'program_name': 'WIEN2k', 'program_basis_set_type': '(L)APW+lo' }, #, 'program_version': 'Before WIEN2k_11'},
            subMatchers = [
                SM(
-                   name = 'header',
-                   startReStr = r"\s*:LABEL[0-9]+: using WIEN2k_(?P<x_wien2k_version>[0-9.]+) \(Release (?P<x_wien2k_release_date>[0-9/.]+)\) in ",
-                   sections=["x_wien2k_header"],
-                   fixedStartValues={'program_name': 'WIEN2k', 'program_basis_set_type': '(L)APW+lo' }
-              ), SM(
                   name = "scf iteration",
                   startReStr = r"\s*:ITE(?P<x_wien2k_iteration_number>[0-9]+):\s*[0-9]*. ITERATION",
                   sections=["section_scf_iteration"],

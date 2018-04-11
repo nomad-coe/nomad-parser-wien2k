@@ -37,7 +37,7 @@ object Wien2kParser extends SimpleExternalParserGenerator(
       )) :: Nil
   ),
   mainFileTypes = Seq("text/.*"),
-  mainFileRe = """:LABEL[0-9]+: using WIEN2k_(?<version>[0-9.]+) \(Release (?<release>[0-9/.]+)\) in """.r,
+  mainFileRe = """:ITE[0-9]+:  1. ITERATION""".r,
   cmd = Seq(DefaultPythonInterpreter.pythonExe(), "${envDir}/parsers/wien2k/parser/parser-wien2k/wien2k_parser.py",
     "--uri", "${mainFileUri}", "${mainFilePath}"),
   resList = Seq(

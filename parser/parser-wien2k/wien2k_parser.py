@@ -12,7 +12,7 @@ import wien2k_parser_struct, wien2k_parser_in0, wien2k_parser_in1c,  wien2k_pars
 # This is the parser for the main output file (.scf) of WIEN2k.
 ################################################################
 
-# Copyright 2016 The NOMAD Team
+# Copyright 2016-2018 The NOMAD Developers Group
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -26,6 +26,10 @@ import wien2k_parser_struct, wien2k_parser_in0, wien2k_parser_in1c,  wien2k_pars
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+__author__ = "Daria M. Tomecka"
+__maintainer__ = "Daria M. Tomecka"
+__email__ = "tomeckadm@gmail.com;"
+__date__ = "15/05/2017"
 
 
 class Wien2kContext(object):

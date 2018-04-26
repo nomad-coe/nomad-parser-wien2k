@@ -12,7 +12,7 @@ import wien2k_parser_struct, wien2k_parser_in0, wien2k_parser_in1c,  wien2k_pars
 # This is the parser for the main output file (.scf) of WIEN2k.
 ################################################################
 
-# Copyright 2016-2018 The NOMAD Developers Group
+# Copyright 2016-2018 Daria M. Tomecka, Fawzi Mohamed
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.

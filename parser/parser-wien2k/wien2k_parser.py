@@ -189,7 +189,7 @@ class Wien2kContext(object):
             with open(fName) as fIn:
                 structParser.parseFile(fIn)
 
-        backend.addArrayValues('configuration_periodic_dimensions', np.asarray([True, True, True]))
+        #backend.addArrayValues('configuration_periodic_dimensions', np.asarray([True, True, True]))
 
 
     def onClose_section_scf_iteration(self, backend, gIndex, section):

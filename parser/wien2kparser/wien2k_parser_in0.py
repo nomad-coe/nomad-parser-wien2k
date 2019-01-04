@@ -1,5 +1,5 @@
 from builtins import object
-import setup_paths
+from wien2kparser import setup_paths
 from nomadcore.simple_parser import mainFunction, CachingLevel
 from nomadcore.simple_parser import SimpleMatcher as SM
 from nomadcore.local_meta_info import loadJsonFile, InfoKindEl
@@ -88,7 +88,7 @@ class Wien2kIn0Context(object):
             'XC_TPSS': ['MGGA_X_TPSS','MGGA_C_TPSS'],
 
             '46':['GGA_X_HTBS'],
-            'XC_HTBS': ['GGA_X_HTBS'], 
+            'XC_HTBS': ['GGA_X_HTBS'],
 
             '47': ['HYB_GGA_XC_B3LYP'],
             'XC_B3LYP': ['HYB_GGA_XC_B3LYP'],
@@ -99,15 +99,15 @@ class Wien2kIn0Context(object):
             #        VX_SLDA:
 
             #        52: ['-'],
-            #        EX_SPBE: 
+            #        EX_SPBE:
             #        VX_SPBE:
 
             #        53: ['-'],
-            #        EX_SWC: 
+            #        EX_SWC:
             #        VX_SWC:
 
             #        54: ['-'],
-            #        EX_SPBESOL: 
+            #        EX_SPBESOL:
             #        VX_SPBESOL:
 
             #        55: ['-'],
@@ -149,7 +149,7 @@ def buildIn0Matchers():
 
 def get_cachingLevelForMetaName(metaInfoEnv, CachingLvl):
     """Sets the caching level for the metadata.
-    
+
     Args:
     metaInfoEnv: metadata which is an object of the class InfoKindEnv in nomadcore.local_meta_info.py.
     CachingLvl: Sets the CachingLevel for the sections k_band, run, and single_configuration_calculation.

@@ -1,11 +1,11 @@
 from builtins import object
-import setup_paths
+from wien2kparser import setup_paths
 import numpy as np
 from nomadcore.simple_parser import mainFunction, AncillaryParser, CachingLevel
 from nomadcore.simple_parser import SimpleMatcher as SM
 from nomadcore.local_meta_info import loadJsonFile, InfoKindEl
 import os, sys, json, logging
-import wien2k_parser_struct, wien2k_parser_in0, wien2k_parser_in1c,  wien2k_parser_in2c, wien2k_parser_in1,  wien2k_parser_in2
+from wien2kparser import wien2k_parser_struct, wien2k_parser_in0, wien2k_parser_in1c, wien2k_parser_in2c, wien2k_parser_in1,  wien2k_parser_in2
 
 
 ################################################################
@@ -164,8 +164,8 @@ class Wien2kContext(object):
         atom_labels = section['x_wien2k_atom_name']
         if atom_labels is not None:
            backend.addArrayValues('atom_labels', np.asarray(atom_labels))
-    
-        
+
+
         # atom force
         atom_force = []
         for i in ['x', 'y', 'z']:
@@ -193,7 +193,7 @@ class Wien2kContext(object):
 
     def onClose_section_scf_iteration(self, backend, gIndex, section):
         #Trigger called when section_scf_iteration is closed.
-        
+
         # count number of SCF iterations
         self.scfIterNr += 1
 
@@ -264,7 +264,7 @@ cachingLevelForMetaName = {
 
     "XC_functional_name": CachingLevel.ForwardAndCache,
     "energy_total": CachingLevel.ForwardAndCache
-    
+
  }
 
 # loading metadata from nomad-meta-info/meta_info/nomad_meta_info/fhi_aims.nomadmetainfo.json
@@ -276,6 +276,36 @@ parserInfo = {
 
 metaInfoPath = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)),"../../../../nomad-meta-info/meta_info/nomad_meta_info/wien2k.nomadmetainfo.json"))
 metaInfoEnv, warnings = loadJsonFile(filePath = metaInfoPath, dependencyLoader = None, extraArgsHandling = InfoKindEl.ADD_EXTRA_ARGS, uri = None)
+
+class Wien2kParser:
+    """ A proper class envolop for running this parser from within python. """
+    def __init__(self, backend, **kwargs):
+        self.backend_factory = backend
+
+    logging.warn('something is wrong')
+    logger = logging.getLogger(__name__)
+    logger.warn(...)
+
+    def parse(self, mainfile):
+        from unittest.mock import patch
+        # _logging.getLogger('nomadcore').setLevel(_logging.WARNING)
+        backend = self.backend_factory(metaInfoEnv)
+        with patch.object(sys, 'argv', ['<exe>', '--uri', 'nmd://uri', mainfile]):
+            mainFunction(
+                mainFileDescription,
+                metaInfoEnv,
+                parserInfo,
+                superContext=Wien2kContext(),
+                superBackend=backend)
+
+        return backend
+
+
+    def setup_logger(self, new_logger):
+        if hasattr(new_logger, 'bind'):
+            # tell tests about received logger
+            new_logger.debug('received logger')
+
 
 if __name__ == "__main__":
     superContext = Wien2kContext()

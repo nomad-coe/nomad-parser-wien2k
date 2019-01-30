@@ -56,7 +56,7 @@ def buildIn2Matchers():
         sections = ["section_run", "section_method"],
     subMatchers = [
 #        SM(name = 'systemName',
-#          startReStr = r"(?P<x_wien2k_system_nameIn>.*)"),
+#          startReStr = r"(?P<x_wien2k_system_namein>.*)"),
         SM(r"\s*(?P<x_wien2k_in2c_switch>[A-Z]+)\s*.*"),
         SM(r"\s*(?P<x_wien2k_in2c_emin>[-+0-9.]+)\s*(?P<x_wien2k_in2c_ne>[-+0-9.]+)\s*(?P<x_wien2k_in2c_espermin>[-+0-9.]+)\s*(?P<x_wien2k_in2c_esper0>[-+0-9.]+)\s*.*"),
         SM(r"\s*(?P<x_wien2k_smearing_kind>[A-Z]+)\s*\s*(?P<x_wien2k_smearing_width__rydberg>[-+0-9.]+)\s*.*"),

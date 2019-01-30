@@ -46,7 +46,7 @@ class Wien2kIn0Context(object):
         # allows to reset values if the same superContext is used to parse different files
         self.initialize_values()
 
-    def onClose_x_wien2k_section_XC(self, backend, gIndex, section):
+    def onClose_x_wien2k_section_xc(self, backend, gIndex, section):
         xc_index = section["x_wien2k_indxc"]   #[0]
         #logging.error("winsectxc: %s -> %s", section, xc_index)
         if not xc_index:
@@ -127,9 +127,9 @@ class Wien2kIn0Context(object):
 
         for xc_name in xc_map_legend:
             #  for xc_name in xc_map_legend[xc_index]:
-            s = backend.openSection("section_XC_functionals")
-            backend.addValue("XC_functional_name", xc_name)
-            backend.closeSection("section_XC_functionals", s)
+            s = backend.openSection("section_xc_functionals")
+            backend.addValue("xc_functional_name", xc_name)
+            backend.closeSection("section_xc_functionals", s)
 
 # description of the input
 def buildIn0Matchers():
@@ -140,8 +140,8 @@ def buildIn0Matchers():
         sections = ["section_run", "section_method"],
         subMatchers = [
             #        SM(name = 'systemName',
-            #          startReStr = r"(?P<x_wien2k_system_nameIn>.*)"),
-            SM(r"(?P<x_wien2k_switch>\w*)\s*(?P<x_wien2k_indxc>\w*)\s*.*",sections = ['x_wien2k_section_XC']),
+            #          startReStr = r"(?P<x_wien2k_system_namein>.*)"),
+            SM(r"(?P<x_wien2k_switch>\w*)\s*(?P<x_wien2k_indxc>\w*)\s*.*",sections = ['x_wien2k_section_xc']),
             SM(r"\s*(?P<x_wien2k_ifft_x>[0-9]+)\s*(?P<x_wien2k_ifft_y>[0-9]+)\s*(?P<x_wien2k_ifft_z>[0-9]+)\s*(?P<x_wien2k_ifft_factor>[0-9.]+)\s*(?P<x_wien2k_iprint>[0-9]+).*")
         ])
 

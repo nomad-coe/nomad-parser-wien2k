@@ -135,14 +135,14 @@ class Wien2kContext(object):
         if self.rootSecMethodIndex is None:
             self.rootSecMethodIndex = gIndex
         self.secMethodIndex = gIndex
-#        self.secMethodIndex["single_configuration_to_calculation_method_ref"] = gIndex
+#        self.secMethodIndex["single_configuration_calculation_to_method_ref"] = gIndex
 
 
     def onClose_section_single_configuration_calculation(self, backend, gIndex, section):
        # write number of SCF iterations
         backend.addValue('number_of_scf_iterations', self.scfIterNr)
         # write the references to section_method and section_system
-        backend.addValue('single_configuration_to_calculation_method_ref', self.secMethodIndex)
+        backend.addValue('single_configuration_calculation_to_method_ref', self.secMethodIndex)
         backend.addValue('single_configuration_calculation_to_system_ref', self.secSystemIndex)
 
 
@@ -174,7 +174,9 @@ class Wien2kContext(object):
                atom_force.append(api)
         if atom_force:
             # need to transpose array since its shape is [number_of_atoms,3] in\the metadata
-           backend.addArrayValues('atom_forces', np.transpose(np.asarray(atom_force)))
+            fId = backend.openSection('section_atom_forces')
+            backend.addArrayValues('atom_forces', np.transpose(np.asarray(atom_force)))
+            backend.closeSection('section_atom_forces', fId)
 
         mainFile = self.parser.fIn.fIn.name
         fName = mainFile[:-4] + ".struct"
@@ -227,11 +229,11 @@ mainFileDescription = SM(
                       SM(r":POT\s*:\s*POTENTIAL OPTION\s*(?P<x_wien2k_potential_option>[0-9]+)"),
                       SM(r":LAT\s*:\s*LATTICE CONSTANTS=\s*(?P<x_wien2k_lattice_const_a>[0-9.]+)\s*(?P<x_wien2k_lattice_const_b>[0-9.]+)\s*(?P<x_wien2k_lattice_const_c>[0-9.]+)"),
                       SM(r":VOL\s*:\s*UNIT CELL VOLUME\s*=\s*(?P<x_wien2k_unit_cell_volume_bohr3>[0-9.]+)"),
-                      SM(r":RKM  : MATRIX SIZE (?P<x_wien2k_matrix_size>[0-9]+)\s*LOs:\s*(?P<x_wien2k_LOs>[0-9.]+)\s*RKM=\s*(?P<x_wien2k_rkm>[0-9.]+)\s*WEIGHT=\s*[0-9.]*\s*\w*:"),
+                      SM(r":RKM  : MATRIX SIZE (?P<x_wien2k_matrix_size>[0-9]+)\s*LOs:\s*(?P<x_wien2k_los>[0-9.]+)\s*RKM=\s*(?P<x_wien2k_rkm>[0-9.]+)\s*WEIGHT=\s*[0-9.]*\s*\w*:"),
                       SM(r":KPT\s*:\s*NUMBER\s*OF\s*K-POINTS:\s*(?P<x_wien2k_nr_kpts>[-+0-9.]+)"),
                       #SM(r":GMA\s*:\s*POTENTIAL\sAND\sCHARGE\sCUT-OFF\s*(?P<x_wien2k_cutoff>[0-9.]+)\s*Ry\*\*[0-9.]+"),
                       SM(r":GMA\s*:\s*POTENTIAL\sAND\sCHARGE\sCUT-OFF\s*(?P<x_wien2k_cutoff>[0-9.]+)\s*Ry\W\W[0-9.]+"),
-                      SM(r":GAP\s*:\s*(?P<x_wien2k_ene_gap__rydberg>[-+0-9.]+)\s*Ry\s*=\s*(?P<x_wien2k_ene_gap_eV>[-+0-9.]+)\s*eV\s*.*"),
+                      SM(r":GAP\s*:\s*(?P<x_wien2k_ene_gap__rydberg>[-+0-9.]+)\s*Ry\s*=\s*(?P<x_wien2k_ene_gap_ev>[-+0-9.]+)\s*eV\s*.*"),
                       SM(r":NOE\s*:\s*NUMBER\sOF\sELECTRONS\s*=\s*(?P<x_wien2k_noe>[0-9.]+)"),
                       SM(r":FER\s*:\s(\w*\s*)*-\s\w*\W\w*\WM\W*=\s*(?P<x_wien2k_fermi_ene__rydberg>[-+0-9.]+)"),
                       SM(r":GMA\s*:\s*POTENTIAL\sAND\sCHARGE\sCUT-OFF\s*[0-9.]+\s*Ry\W\W[0-9.]+"),
@@ -262,7 +264,7 @@ mainFileDescription = SM(
 
 cachingLevelForMetaName = {
 
-    "XC_functional_name": CachingLevel.ForwardAndCache,
+    "xc_functional_name": CachingLevel.ForwardAndCache,
     "energy_total": CachingLevel.ForwardAndCache
     
  }

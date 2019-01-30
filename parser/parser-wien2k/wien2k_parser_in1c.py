@@ -55,7 +55,7 @@ def buildIn1cMatchers():
         sections = ["section_run", "section_method"],
     subMatchers = [
 #        SM(name = 'systemName',
-#          startReStr = r"(?P<x_wien2k_system_nameIn>.*)"),
+#          startReStr = r"(?P<x_wien2k_system_namein>.*)"),
         SM(r"\s*(?P<x_wien2k_wf_switch>[\w*]+)\s*EF=[-+.0-9]*\s*\W*WFFIL, WFPRI, ENFIL, SUPWF\W"),
         SM(r"\s*(?P<x_wien2k_rkmax>[0-9.]+)\s*[0-9]+\s*[0-9]+\s*\WR-..\WK-...; MAX \w*.*")
 #        SM(r"(?P<x_wien2k_calc_mode>.*)"),
@@ -67,7 +67,7 @@ def buildIn1cMatchers():
 #               SM(r"\s*[-0-9]+:\s*X=(?P<x_wien2k_atom_pos_x>[-+0-9.eEdD]+)\s*Y=(?P<x_wien2k_atom_pos_y>[-+0-9.eEdD]+)\s*Z=(?P<x_wien2k_atom_pos_z>[-+0-9.eEdD]+)",
 #                  repeats=True
 #              ),
-#               SM(r"\s*(?P<x_wien2k_atom_name>^.+)\s*NPT=\s*(?P<x_wien2k_NPT>[0-9]+)\s*R0=(?P<x_wien2k_R0>[0-9.]+)\s*RMT=\s*(?P<x_wien2k_RMT>[0-9.]+)\s*Z:\s*(?P<x_wien2k_atomic_number_Z>[0-9.]+)",)
+#               SM(r"\s*(?P<x_wien2k_atom_name>^.+)\s*NPT=\s*(?P<x_wien2k_npt>[0-9]+)\s*R0=(?P<x_wien2k_r0>[0-9.]+)\s*RMT=\s*(?P<x_wien2k_rmt>[0-9.]+)\s*Z:\s*(?P<x_wien2k_atomic_number_z>[0-9.]+)",)
 #           ]
 #       )
     ])

@@ -1,5 +1,5 @@
 from builtins import object
-import setup_paths
+import wien2kparser.setup_paths as setup_paths
 from nomadcore.simple_parser import mainFunction, CachingLevel
 from nomadcore.simple_parser import SimpleMatcher as SM
 from nomadcore.local_meta_info import loadJsonFile, InfoKindEl

@@ -1,5 +1,5 @@
 from builtins import object
-import setup_paths
+import wien2kparser.setup_paths as setup_paths
 from nomadcore.simple_parser import mainFunction, CachingLevel
 from nomadcore.simple_parser import SimpleMatcher as SM
 from nomadcore.local_meta_info import loadJsonFile, InfoKindEl
@@ -7,7 +7,7 @@ import os, sys, json
 
 
 ################################################################
-# This is the subparser for the WIEN2k input file (.in1c)
+# This is the subparser for the WIEN2k input file (.in1)
 ################################################################
 
 # Copyright 2016-2018 Daria M. Tomecka, Fawzi Mohamed
@@ -29,8 +29,8 @@ __maintainer__ = "Daria M. Tomecka"
 __email__ = "tomeckadm@gmail.com;"
 __date__ = "15/05/2017"
 
-class Wien2kIn1cContext(object):
-    """context for wien2k In1c  parser"""
+class Wien2kIn1Context(object):
+    """context for wien2k In1 parser"""
 
     def __init__(self):
         self.parser = None
@@ -47,7 +47,7 @@ class Wien2kIn1cContext(object):
 
 
 # description of the input
-def buildIn1cMatchers():
+def buildIn1Matchers():
     return SM(
     name = 'root',
     weak = True,

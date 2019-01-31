@@ -1,11 +1,20 @@
 from builtins import object
-import setup_paths
+# import setup_paths
 import numpy as np
+import os
+import sys
+
 from nomadcore.simple_parser import mainFunction, AncillaryParser, CachingLevel
 from nomadcore.simple_parser import SimpleMatcher as SM
 from nomadcore.local_meta_info import loadJsonFile, InfoKindEl
-import os, sys, json, logging
-import wien2k_parser_struct, wien2k_parser_in0, wien2k_parser_in1c,  wien2k_parser_in2c, wien2k_parser_in1,  wien2k_parser_in2
+import wien2kparser.wien2k_parser_struct as wien2k_parser_struct
+import wien2kparser.wien2k_parser_in0 as wien2k_parser_in0
+import wien2kparser.wien2k_parser_in1c as wien2k_parser_in1c
+import wien2kparser.wien2k_parser_in2c as wien2k_parser_in2c
+import wien2kparser.wien2k_parser_in1 as wien2k_parser_in1
+import wien2kparser.wien2k_parser_in2 as wien2k_parser_in2
+import wien2kparser.setup_paths as setup_paths
+import logging as _logging
 
 
 ################################################################
@@ -164,8 +173,8 @@ class Wien2kContext(object):
         atom_labels = section['x_wien2k_atom_name']
         if atom_labels is not None:
            backend.addArrayValues('atom_labels', np.asarray(atom_labels))
-    
-        
+
+
         # atom force
         atom_force = []
         for i in ['x', 'y', 'z']:
@@ -193,7 +202,7 @@ class Wien2kContext(object):
 
     def onClose_section_scf_iteration(self, backend, gIndex, section):
         #Trigger called when section_scf_iteration is closed.
-        
+
         # count number of SCF iterations
         self.scfIterNr += 1
 
@@ -264,7 +273,7 @@ cachingLevelForMetaName = {
 
     "XC_functional_name": CachingLevel.ForwardAndCache,
     "energy_total": CachingLevel.ForwardAndCache
-    
+
  }
 
 # loading metadata from nomad-meta-info/meta_info/nomad_meta_info/fhi_aims.nomadmetainfo.json
@@ -273,9 +282,48 @@ parserInfo = {
   "name": "Wien2k",
   "version": "1.0"
 }
+import nomad_meta_info
+# metaInfoPath = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)),"../../../../nomad-meta-info/meta_info/nomad_meta_info/wien2k.nomadmetainfo.json"))
+# metaInfoEnv, warnings = loadJsonFile(filePath = metaInfoPath, dependencyLoader = None, extraArgsHandling = InfoKindEl.ADD_EXTRA_ARGS, uri = None)
 
-metaInfoPath = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)),"../../../../nomad-meta-info/meta_info/nomad_meta_info/wien2k.nomadmetainfo.json"))
+metaInfoPath = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(nomad_meta_info.__file__)), "wien2k.nomadmetainfo.json"))
 metaInfoEnv, warnings = loadJsonFile(filePath = metaInfoPath, dependencyLoader = None, extraArgsHandling = InfoKindEl.ADD_EXTRA_ARGS, uri = None)
+
+class Wien2kParser():
+    """ A proper class envolop for running this parser from within python. """
+    def __init__(self, backend, **kwargs):
+        self.backend_factory = backend
+
+    def parse(self, mainfile):
+        from unittest.mock import patch
+        _logging.getLogger('nomadcore').setLevel(_logging.WARNING)
+        backend = self.backend_factory(metaInfoEnv)
+        with patch.object(sys, 'argv', ['<exe>', '--uri', 'nmd://uri', mainfile]):
+            mainFunction(
+                mainFileDescription,
+                metaInfoEnv,
+                parserInfo,
+                cachingLevelForMetaName = cachingLevelForMetaName,
+                superContext=Wien2kContext(),
+                superBackend=backend)
+
+        return backend
+
+    def setup_logger(self, new_logger):
+        if hasattr(new_logger, 'bind'):
+            # tell tests about received logger
+            new_logger.debug('received logger')
+
+            # only do this for struct logs
+            from excitingparser import parser_exciting, exciting_parser_XS_input, \
+                exciting_parser_GS_input, exciting_parser_dos, exciting_parser_bandstructure
+
+            parser_exciting.logging = new_logger
+            exciting_parser_XS_input.logging = new_logger.bind(legacy_logging='XS_input')
+            exciting_parser_GS_input.logging = new_logger.bind(legacy_logging='GS_input')
+            exciting_parser_dos.logging = new_logger.bind(legacy_logging='dos')
+            exciting_parser_bandstructure.logging = new_logger.bind(legacy_logging='band')
+
 
 if __name__ == "__main__":
     superContext = Wien2kContext()

@@ -19,10 +19,17 @@ def main():
     setup(
         name='wien2kparser',
         version='0.1',
+<<<<<<< HEAD
         description='NOMAD parser implementation for Exciting.',
         license='APACHE 2.0',
         package_dir={'': 'parser/parser-wien2k'},
         packages=find_packages('parser/parser-wien2k'),
+=======
+        description='NOMAD parser implementation for Wien2k.',
+        license='APACHE 2.0',
+        package_dir={'': 'parser'},
+        packages=find_packages('parser'),
+>>>>>>> 45edbd908359cbb40b004309010e2487a8ffbb7c
         install_requires=[
             'nomadcore'
         ],

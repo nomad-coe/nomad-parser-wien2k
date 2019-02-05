@@ -102,7 +102,6 @@ class Wien2kContext(object):
             with open(fName) as fIn:
                 subParser.parseFile(fIn)
 
-
         mainFile = self.parser.fIn.fIn.name
         fName = mainFile[:-4] + ".in2c"
         if os.path.exists(fName):
@@ -308,21 +307,6 @@ class Wien2kParser():
                 superBackend=backend)
 
         return backend
-
-    def setup_logger(self, new_logger):
-        if hasattr(new_logger, 'bind'):
-            # tell tests about received logger
-            new_logger.debug('received logger')
-
-            # only do this for struct logs
-            from excitingparser import parser_exciting, exciting_parser_XS_input, \
-                exciting_parser_GS_input, exciting_parser_dos, exciting_parser_bandstructure
-
-            parser_exciting.logging = new_logger
-            exciting_parser_XS_input.logging = new_logger.bind(legacy_logging='XS_input')
-            exciting_parser_GS_input.logging = new_logger.bind(legacy_logging='GS_input')
-            exciting_parser_dos.logging = new_logger.bind(legacy_logging='dos')
-            exciting_parser_bandstructure.logging = new_logger.bind(legacy_logging='band')
 
 
 if __name__ == "__main__":

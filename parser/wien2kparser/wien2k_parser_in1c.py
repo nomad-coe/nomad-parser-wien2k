@@ -60,11 +60,11 @@ def buildIn1cMatchers():
         SM(r"\s*(?P<x_wien2k_rkmax>[0-9.]+)\s*[0-9]+\s*[0-9]+\s*\WR-..\WK-...; MAX \w*.*")
 #        SM(r"(?P<x_wien2k_calc_mode>.*)"),
 #        SM(r"\s*(?P<x_wien2k_unit_cell_param_a>[-+0-9]*\.\d{0,6}){0,10}\s*(?P<x_wien2k_unit_cell_param_b>[-+0-9]*\.\d{0,6}){0,10}\s*(?P<x_wien2k_unit_cell_param_c>[-+0-9]*\.\d{0,6}){0,10}\s*(?P<x_wien2k_angle_between_unit_axis_alfa>[-+]?[0-9]*\.\d{0,6}){0,10}\s*(?P<x_wien2k_angle_between_unit_axis_beta>[-+]?[0-9]*\.\d{0,6}){0,10}\s*(?P<x_wien2k_angle_between_unit_axis_gamma>[-+]?[0-9]*\.\d*)"),
-#        SM(r"\s*ATOM\s*[-0-9]+:\s*X=(?P<x_wien2k_atom_pos_x>[-+0-9.eEdD]+)\s*Y=(?P<x_wien2k_atom_pos_y>[-+0-9.eEdD]+)\s*Z=(?P<x_wien2k_atom_pos_z>[-+0-9.eEdD]+)",
+#        SM(r"\s*ATOM\s*[-0-9]+:\s*X=(?P<x_wien2k_atom_pos_x>[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?)\s*Y=(?P<x_wien2k_atom_pos_y>[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?)\s*Z=(?P<x_wien2k_atom_pos_z>[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?)",
 #           repeats=True,
 #           sections=["x_wien2k_section_equiv_atoms"],
 #           subMatchers=[
-#               SM(r"\s*[-0-9]+:\s*X=(?P<x_wien2k_atom_pos_x>[-+0-9.eEdD]+)\s*Y=(?P<x_wien2k_atom_pos_y>[-+0-9.eEdD]+)\s*Z=(?P<x_wien2k_atom_pos_z>[-+0-9.eEdD]+)",
+#               SM(r"\s*[-0-9]+:\s*X=(?P<x_wien2k_atom_pos_x>[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?)\s*Y=(?P<x_wien2k_atom_pos_y>[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?)\s*Z=(?P<x_wien2k_atom_pos_z>[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?)",
 #                  repeats=True
 #              ),
 #               SM(r"\s*(?P<x_wien2k_atom_name>^.+)\s*NPT=\s*(?P<x_wien2k_NPT>[0-9]+)\s*R0=(?P<x_wien2k_R0>[0-9.]+)\s*RMT=\s*(?P<x_wien2k_RMT>[0-9.]+)\s*Z:\s*(?P<x_wien2k_atomic_number_Z>[0-9.]+)",)

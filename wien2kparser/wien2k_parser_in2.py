@@ -82,4 +82,4 @@ def get_cachingLevelForMetaName(metaInfoEnv, CachingLvl):
                               }
     return cachingLevelForMetaName
 
-# loading metadata from nomad-meta-info/meta_info/nomad_meta_info/fhi_aims.nomadmetainfo.json
+# loading metadata from nomad-meta-info/meta_info/nomad_meta_info/fhiaims.nomadmetainfo.json

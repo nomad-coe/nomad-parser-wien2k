@@ -21,8 +21,8 @@ def main():
         version='0.1',
         description='NOMAD parser implementation for Wien2k.',
         license='APACHE 2.0',
-        package_dir={'': 'parser/parser-wien2k'},
-        packages=find_packages('parser/parser-wien2k'),
+        package_dir={'': './'},
+        packages=find_packages(),
         install_requires=[
             'nomadcore'
         ],

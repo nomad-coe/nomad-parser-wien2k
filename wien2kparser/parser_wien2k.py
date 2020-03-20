@@ -281,12 +281,6 @@ parserInfo = {
   "name": "Wien2k",
   "version": "1.0"
 }
-import nomad_meta_info
-# metaInfoPath = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)),"../../../../nomad-meta-info/meta_info/nomad_meta_info/wien2k.nomadmetainfo.json"))
-# metaInfoEnv, warnings = loadJsonFile(filePath = metaInfoPath, dependencyLoader = None, extraArgsHandling = InfoKindEl.ADD_EXTRA_ARGS, uri = None)
-
-metaInfoPath = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(nomad_meta_info.__file__)), "wien2k.nomadmetainfo.json"))
-metaInfoEnv, warnings = loadJsonFile(filePath = metaInfoPath, dependencyLoader = None, extraArgsHandling = InfoKindEl.ADD_EXTRA_ARGS, uri = None)
 
 class Wien2kParser():
     """ A proper class envolop for running this parser from within python. """
@@ -296,11 +290,11 @@ class Wien2kParser():
     def parse(self, mainfile):
         from unittest.mock import patch
         _logging.getLogger('nomadcore').setLevel(_logging.WARNING)
-        backend = self.backend_factory(metaInfoEnv)
+        backend = self.backend_factory("wien2k.nomadmetainfo.json")
         with patch.object(sys, 'argv', ['<exe>', '--uri', 'nmd://uri', mainfile]):
             mainFunction(
                 mainFileDescription,
-                metaInfoEnv,
+                None,
                 parserInfo,
                 cachingLevelForMetaName = cachingLevelForMetaName,
                 superContext=Wien2kContext(),
@@ -310,5 +304,9 @@ class Wien2kParser():
 
 
 if __name__ == "__main__":
+    import metainfo
+    metaInfoPath = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(metainfo.__file__)), "wien2k.nomadmetainfo.json"))
+    metaInfoEnv, warnings = loadJsonFile(filePath = metaInfoPath, dependencyLoader = None, extraArgsHandling = InfoKindEl.ADD_EXTRA_ARGS, uri = None)
+
     superContext = Wien2kContext()
     mainFunction(mainFileDescription, metaInfoEnv, parserInfo, superContext = superContext)

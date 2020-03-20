@@ -13,9 +13,9 @@ import wien2kparser.wien2k_parser_in1c as wien2k_parser_in1c
 import wien2kparser.wien2k_parser_in2c as wien2k_parser_in2c
 import wien2kparser.wien2k_parser_in1 as wien2k_parser_in1
 import wien2kparser.wien2k_parser_in2 as wien2k_parser_in2
-import wien2kparser.setup_paths as setup_paths
 import logging as _logging
 
+from nomad.parsing.legacy import CoESimpleMatcherParser
 
 ################################################################
 # This is the parser for the main output file (.scf) of WIEN2k.
@@ -266,47 +266,26 @@ mainFileDescription = SM(
     ])
 
 
-# which values to cache or forward (mapping meta name -> CachingLevel)
+class Wien2kParser(CoESimpleMatcherParser):
 
-cachingLevelForMetaName = {
+    def metainfo_env(self):
+        from .metainfo import m_env
+        return m_env
 
-    "XC_functional_name": CachingLevel.ForwardAndCache,
-    "energy_total": CachingLevel.ForwardAndCache
+    def create_super_context(self):
+        return Wien2kContext()
 
- }
+    def create_simple_matcher(self):
+        return mainFileDescription
 
-# loading metadata from nomad-meta-info/meta_info/nomad_meta_info/fhi_aims.nomadmetainfo.json
+    def create_parser_description(self):
+        return {
+            "name": "Wien2k",
+            "version": "1.0"
+        }
 
-parserInfo = {
-  "name": "Wien2k",
-  "version": "1.0"
-}
-
-class Wien2kParser():
-    """ A proper class envolop for running this parser from within python. """
-    def __init__(self, backend, **kwargs):
-        self.backend_factory = backend
-
-    def parse(self, mainfile):
-        from unittest.mock import patch
-        _logging.getLogger('nomadcore').setLevel(_logging.WARNING)
-        backend = self.backend_factory("wien2k.nomadmetainfo.json")
-        with patch.object(sys, 'argv', ['<exe>', '--uri', 'nmd://uri', mainfile]):
-            mainFunction(
-                mainFileDescription,
-                None,
-                parserInfo,
-                cachingLevelForMetaName = cachingLevelForMetaName,
-                superContext=Wien2kContext(),
-                superBackend=backend)
-
-        return backend
-
-
-if __name__ == "__main__":
-    import metainfo
-    metaInfoPath = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(metainfo.__file__)), "wien2k.nomadmetainfo.json"))
-    metaInfoEnv, warnings = loadJsonFile(filePath = metaInfoPath, dependencyLoader = None, extraArgsHandling = InfoKindEl.ADD_EXTRA_ARGS, uri = None)
-
-    superContext = Wien2kContext()
-    mainFunction(mainFileDescription, metaInfoEnv, parserInfo, superContext = superContext)
+    def create_caching_levels(self):
+        return {
+            "XC_functional_name": CachingLevel.ForwardAndCache,
+            "energy_total": CachingLevel.ForwardAndCache
+        }

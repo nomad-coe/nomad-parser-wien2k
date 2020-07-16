@@ -1,6 +1,7 @@
 from builtins import object
 # import setup_paths
 import numpy as np
+import ase.io
 import os
 import sys
 
@@ -173,7 +174,6 @@ class Wien2kContext(object):
         if atom_labels is not None:
            backend.addArrayValues('atom_labels', np.asarray(atom_labels))
 
-
         # atom force
         atom_force = []
         for i in ['x', 'y', 'z']:
@@ -184,20 +184,30 @@ class Wien2kContext(object):
             # need to transpose array since its shape is [number_of_atoms,3] in\the metadata
            backend.addArrayValues('atom_forces', np.transpose(np.asarray(atom_force)))
 
+        # Parse the structure file
         mainFile = self.parser.fIn.fIn.name
         fName = mainFile[:-4] + ".struct"
         if os.path.exists(fName):
-            structSuperContext = wien2k_parser_struct.Wien2kStructContext()
-            structParser = AncillaryParser(
-                fileDescription = wien2k_parser_struct.buildStructureMatchers(),
-                parser = self.parser,
-                cachingLevelForMetaName = wien2k_parser_struct.get_cachingLevelForMetaName(self.metaInfoEnv, CachingLevel.PreOpenedIgnore),
-                superContext = structSuperContext)
 
-            with open(fName) as fIn:
-                structParser.parseFile(fIn)
+            # ASE does not support reading file object for WIEN2k structure files.
+            atoms = ase.io.read(fName, format="struct")
+            pos = atoms.get_positions() * 1E-10
+            symbols = atoms.get_chemical_symbols()
+            cell = atoms.get_cell() * 1E-10
+            pbc = atoms.get_pbc()
+            backend.addArrayValues('lattice_vectors', cell)
+            backend.addArrayValues("configuration_periodic_dimensions", pbc)
+            backend.addValue("atom_labels", symbols)
+            backend.addArrayValues('atom_positions', pos)
 
-
+            with open(fName, "r") as fin:
+                structSuperContext = wien2k_parser_struct.Wien2kStructContext()
+                structParser = AncillaryParser(
+                    fileDescription = wien2k_parser_struct.buildStructureMatchers(),
+                    parser = self.parser,
+                    cachingLevelForMetaName = wien2k_parser_struct.get_cachingLevelForMetaName(self.metaInfoEnv, CachingLevel.PreOpenedIgnore),
+                    superContext = structSuperContext)
+                structParser.parseFile(fin)
 
     def onClose_section_scf_iteration(self, backend, gIndex, section):
         #Trigger called when section_scf_iteration is closed.

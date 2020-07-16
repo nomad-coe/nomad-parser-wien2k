@@ -30,7 +30,8 @@ __maintainer__ = "Daria M. Tomecka"
 __email__ = "tomeckadm@gmail.com;"
 __date__ = "15/05/2017"
 
-class Wien2kStructContext(object):
+
+class Wien2kStructContext():
     """context for wien2k struct parser"""
 
     def __init__(self):
@@ -45,46 +46,6 @@ class Wien2kStructContext(object):
         self.parser = parser
         # allows to reset values if the same superContext is used to parse different files
         self.initialize_values()
-
-    def onClose_section_system(self, backend, gIndex, section):
-        #   unit_cell
-        unit_cell_params = []
-        for i in ['a', 'b', 'c']:
-            uci = section['x_wien2k_unit_cell_param_' + i]
-            #if uci is not None:
-            unit_cell_params.append(uci[0])
-        for i in ['alfa', 'beta', 'gamma']:
-            uci = section['x_wien2k_angle_between_unit_axis_' + i]
-            # if uci is not None:
-            unit_cell_params.append(uci[0])
-
-        unit_cell = ase.geometry.cellpar_to_cell(unit_cell_params)
-        backend.addArrayValues('simulation_cell', unit_cell)
-        backend.addArrayValues("configuration_periodic_dimensions", np.ones(3, dtype=bool))
-
-        equiv_atoms = section["x_wien2k_section_equiv_atoms"]
-        #logging.error("section: %s", section)
-        labels = []
-        pos = []
-
-        for eqAtoms in equiv_atoms:
-            label = eqAtoms["x_wien2k_atom_name"][0]
-            x = eqAtoms["x_wien2k_atom_pos_x"]
-            y = eqAtoms["x_wien2k_atom_pos_y"]
-            z = eqAtoms["x_wien2k_atom_pos_z"]
-            #logging.error("equiv_atoms: %s x %s y %s z %s",eqAtoms, x, y, z)
-            if len(x) != len(y) or len(x) != len(z):
-                raise Exception("incorrect parsing, different number of x,y,z components")
-            groupPos = [[x[i],y[i],z[i]] for i in range(len(x))]
-            nAt = len(groupPos)
-            labels += [label for i in range(nAt)]
-            pos += groupPos
-        backend.addValue("atom_labels", labels)
-
-        #backend.addArrayValues("atom_positions", np.dot(pos,unit_cell))
-        #backend.addArrayValues('atom_positions', np.transpose(np.asarray(pos)))
-        backend.addArrayValues('atom_positions', np.asarray(pos))
-
 
 
 # description of the input

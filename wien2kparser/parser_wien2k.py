@@ -14,7 +14,7 @@ import wien2kparser.wien2k_parser_in1c as wien2k_parser_in1c
 import wien2kparser.wien2k_parser_in2c as wien2k_parser_in2c
 import wien2kparser.wien2k_parser_in1 as wien2k_parser_in1
 import wien2kparser.wien2k_parser_in2 as wien2k_parser_in2
-import logging as _logging
+import logging
 
 from nomad.parsing.legacy import CoESimpleMatcherParser
 
@@ -190,15 +190,19 @@ class Wien2kContext(object):
         if os.path.exists(fName):
 
             # ASE does not support reading file object for WIEN2k structure files.
-            atoms = ase.io.read(fName, format="struct")
-            pos = atoms.get_positions() * 1E-10
-            symbols = atoms.get_chemical_symbols()
-            cell = atoms.get_cell() * 1E-10
-            pbc = atoms.get_pbc()
-            backend.addArrayValues('lattice_vectors', cell)
-            backend.addArrayValues("configuration_periodic_dimensions", pbc)
-            backend.addValue("atom_labels", symbols)
-            backend.addArrayValues('atom_positions', pos)
+            try:
+                atoms = ase.io.read(fName, format="struct")
+            except Exception:
+                logging.error("Could not read/parse the WIEN2k structure file.")
+            else:
+                pos = atoms.get_positions() * 1E-10
+                symbols = atoms.get_chemical_symbols()
+                cell = atoms.get_cell() * 1E-10
+                pbc = atoms.get_pbc()
+                backend.addArrayValues('lattice_vectors', cell)
+                backend.addArrayValues("configuration_periodic_dimensions", pbc)
+                backend.addValue("atom_labels", symbols)
+                backend.addArrayValues('atom_positions', pos)
 
             with open(fName, "r") as fin:
                 structSuperContext = wien2k_parser_struct.Wien2kStructContext()

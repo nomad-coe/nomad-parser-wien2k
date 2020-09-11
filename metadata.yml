@@ -1,7 +1,0 @@
-code-label: WIEN2k
-code-label-style: All in capitals, except k
-code-url: http://www.wien2k.at/
-parser-dir-name: dependencies/parsers/wien2k/
-parser-git-url: https://gitlab.mpcdf.mpg.de/nomad-lab/parser-wien2k
-parser-specific: ''
-table-of-files: ''

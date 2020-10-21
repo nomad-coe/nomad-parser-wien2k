@@ -1,1 +1,0 @@
-from wien2kparser.wien2k_parser import Wien2kParser

@@ -10,8 +10,6 @@ from nomadcore.simple_parser import SimpleMatcher as SM
 from nomadcore.local_meta_info import loadJsonFile, InfoKindEl
 import wien2kparser.wien2k_parser_struct as wien2k_parser_struct
 import wien2kparser.wien2k_parser_in0 as wien2k_parser_in0
-import wien2kparser.wien2k_parser_in1c as wien2k_parser_in1c
-import wien2kparser.wien2k_parser_in2c as wien2k_parser_in2c
 import wien2kparser.wien2k_parser_in1 as wien2k_parser_in1
 import wien2kparser.wien2k_parser_in2 as wien2k_parser_in2
 import logging
@@ -92,31 +90,9 @@ class Wien2kContext(object):
 
 
         mainFile = self.parser.fIn.fIn.name
-        fName = mainFile[:-4] + ".in1c"
-        if os.path.exists(fName):
-            subSuperContext = wien2k_parser_in1c.Wien2kIn1cContext()
-            subParser = AncillaryParser(
-                fileDescription = wien2k_parser_in1c.buildIn1cMatchers(),
-                parser = self.parser,
-                cachingLevelForMetaName = wien2k_parser_in1c.get_cachingLevelForMetaName(self.metaInfoEnv, CachingLevel.PreOpenedIgnore),
-                superContext = subSuperContext)
-            with open(fName) as fIn:
-                subParser.parseFile(fIn)
-
-        mainFile = self.parser.fIn.fIn.name
-        fName = mainFile[:-4] + ".in2c"
-        if os.path.exists(fName):
-            subSuperContext = wien2k_parser_in2c.Wien2kIn2cContext()
-            subParser = AncillaryParser(
-                fileDescription = wien2k_parser_in2c.buildIn2cMatchers(),
-                parser = self.parser,
-                cachingLevelForMetaName = wien2k_parser_in2c.get_cachingLevelForMetaName(self.metaInfoEnv, CachingLevel.PreOpenedIgnore),
-                superContext = subSuperContext)
-            with open(fName) as fIn:
-                subParser.parseFile(fIn)
-
-        mainFile = self.parser.fIn.fIn.name
         fName = mainFile[:-4] + ".in1"
+        if not os.path.exists(fName):
+            fName = mainFile[:-4] + ".in1c"
         if os.path.exists(fName):
             subSuperContext = wien2k_parser_in1.Wien2kIn1Context()
             subParser = AncillaryParser(
@@ -130,6 +106,8 @@ class Wien2kContext(object):
 
         mainFile = self.parser.fIn.fIn.name
         fName = mainFile[:-4] + ".in2"
+        if not os.path.exists(fName):
+            fName = mainFile[:-4] + ".in2c"
         if os.path.exists(fName):
             subSuperContext = wien2k_parser_in2.Wien2kIn2Context()
             subParser = AncillaryParser(
@@ -255,10 +233,11 @@ mainFileDescription = SM(
                       SM(r":GMA\s*:\s*POTENTIAL\sAND\sCHARGE\sCUT-OFF\s*(?P<x_wien2k_cutoff>[0-9.]+)\s*Ry\W\W[0-9.]+"),
                       SM(r":GAP\s*:\s*(?P<x_wien2k_ene_gap__rydberg>[-+0-9.]+)\s*Ry\s*=\s*(?P<x_wien2k_ene_gap_eV>[-+0-9.]+)\s*eV\s*.*"),
                       SM(r":NOE\s*:\s*NUMBER\sOF\sELECTRONS\s*=\s*(?P<x_wien2k_noe>[0-9.]+)"),
-                      SM(r":FER\s*:\s(\w*\s*)*-\s\w*\W\w*\WM\W*=\s*(?P<x_wien2k_fermi_ene__rydberg>[-+0-9.]+)"),
+                      SM(r":FER\s*:\sF E R M I -\s\w*\W\w*\WM\W*=\s*(?P<energy_reference_fermi_iteration__rydberg>[-+0-9.]+)"),
                       SM(r":GMA\s*:\s*POTENTIAL\sAND\sCHARGE\sCUT-OFF\s*[0-9.]+\s*Ry\W\W[0-9.]+"),
                       SM(r":CHA(?P<x_wien2k_atom_nr>[-+0-9]+):\s*TOTAL\s*\w*\s*CHARGE INSIDE SPHERE\s*(?P<x_wien2k_sphere_nr>[-+0-9]+)\s*=\s*(?P<x_wien2k_tot_val_charge_sphere>[0-9.]+)",repeats = True),
                       SM(r":CHA\s*:\s*TOTAL\s*\w*\s*CHARGE INSIDE\s*\w*\s*CELL\s=\s*(?P<x_wien2k_tot_val_charge_cell>[-+0-9.]+)"),
+                      SM(r":SUM\s*:\s*SUM OF EIGENVALUES\s*=\s*(?P<energy_sum_eigenvalues_scf_iteration__rydberg>[-+0-9.]+)"),
                       SM(r":MMTOT: TOTAL MAGNETIC MOMENT IN CELL =\s*(?P<x_wien2k_mmtot>[-+0-9.]+)"),
                       SM(r":MMINT: MAGNETIC MOMENT IN INTERSTITIAL =\s*(?P<x_wien2k_mmint>[-+0-9.]+)"),
                       SM(r":MMI001: MAGNETIC MOMENT IN SPHERE 1 =\s*(?P<x_wien2k_mmi001>[-+0-9.]+)"),
@@ -270,7 +249,7 @@ mainFileDescription = SM(
                       SM(r":CTO\s*:\s*\sTOTAL\s*INTERSTITIAL\s*CHARGE=\s*(?P<x_wien2k_tot_int_charge>[-+0-9.]+)"),
                       SM(r":CTO(?P<x_wien2k_atom_nr>[-+0-9]+)[0-9]*:\s*\sTOTAL\s*CHARGE\s*IN\s*SPHERE\s*(?P<x_wien2k_sphere_nr>[-+0-9]+)\s*=\s*(?P<x_wien2k_tot_charge_in_sphere>[-+0-9.]+)",repeats = True),
 #                      SM(r":NEC(?P<x_wien2k_necnr>[-+0-9]+)\s*:\s*NUCLEAR AND ELECTRONIC CHARGE\s*(?P<x_wien2k_nuclear_charge>[-+0-9.]+)\s*(?P<x_wien2k_electronic_charge>[0-9.]+)",repeats = True),
-                      SM(r":ENE\s*:\s*\W*\w*\W*\s*TOTAL\s*ENERGY\s*IN\s*Ry\s*=\s*(?P<x_wien2k_energy_total__rydberg>[-+0-9.]+)"),
+                      SM(r":ENE\s*:\s*\W*\w*\W*\s*TOTAL\s*ENERGY\s*IN\s*Ry\s*=\s*(?P<energy_total_scf_iteration__rydberg>[-+0-9.]+)"),
                       SM(r":FOR[0-9]*:\s*(?P<x_wien2k_atom_nr>[0-9]+).ATOM\s*(?P<x_wien2k_for_abs>[0-9.]+)\s*(?P<x_wien2k_for_x>[-++0-9.]+)\s*(?P<x_wien2k_for_y>[-+0-9.]+)\s*(?P<x_wien2k_for_z>[-+0-9.]+)\s*partial\sforces", repeats = True),
                       SM(r":FGL[0-9]*:\s*(?P<x_wien2k_atom_nr>[0-9]+).ATOM\s*(?P<x_wien2k_for_x_gl>[-+0-9.]+)\s*(?P<x_wien2k_for_y_gl>[-+0-9.]+)\s*(?P<x_wien2k_for_z_gl>[-+0-9.]+)\s*partial\sforces", repeats = True)
                   ]

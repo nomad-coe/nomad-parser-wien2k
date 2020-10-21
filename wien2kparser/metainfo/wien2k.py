@@ -687,54 +687,54 @@ class section_method(public.section_method):
         ''',
         a_legacy=LegacyDefinition(name='x_wien2k_rkmax'))
 
-    x_wien2k_in2c_switch = Quantity(
+    x_wien2k_in2_switch = Quantity(
         type=str,
         shape=[],
         description='''
-        switch, in in2c between (TOT,FOR,QTL,EFG,ALM,CLM,FERMI)
+        switch, in in2 between (TOT,FOR,QTL,EFG,ALM,CLM,FERMI)
         ''',
-        a_legacy=LegacyDefinition(name='x_wien2k_in2c_switch'))
+        a_legacy=LegacyDefinition(name='x_wien2k_in2_switch'))
 
-    x_wien2k_in2c_emin = Quantity(
+    x_wien2k_in2_emin = Quantity(
         type=np.dtype(np.float64),
         shape=[],
         description='''
-        lower energy cut-off for defining the range of occupied states; in in2c
+        lower energy cut-off for defining the range of occupied states; in in2
         ''',
-        a_legacy=LegacyDefinition(name='x_wien2k_in2c_emin'))
+        a_legacy=LegacyDefinition(name='x_wien2k_in2_emin'))
 
-    x_wien2k_in2c_ne = Quantity(
+    x_wien2k_in2_ne = Quantity(
         type=np.dtype(np.float64),
         shape=[],
         description='''
-        number of electrons (per unit cell) in given energy range in in2c
+        number of electrons (per unit cell) in given energy range in in2
         ''',
-        a_legacy=LegacyDefinition(name='x_wien2k_in2c_ne'))
+        a_legacy=LegacyDefinition(name='x_wien2k_in2_ne'))
 
-    x_wien2k_in2c_espermin = Quantity(
+    x_wien2k_in2_espermin = Quantity(
         type=np.dtype(np.float64),
         shape=[],
         description='''
         LAPW2 tries to find the .mean. energies for each l channel, for both the valence
         and the semicore states. To define .valence. and .semicore. it starts at (EF -
         .esepermin.) and searches for a .gap. with a width of at least .eseper0. and
-        defines this as separation energy of valence and semicore; in in2c
+        defines this as separation energy of valence and semicore; in in2
         ''',
-        a_legacy=LegacyDefinition(name='x_wien2k_in2c_espermin'))
+        a_legacy=LegacyDefinition(name='x_wien2k_in2_espermin'))
 
-    x_wien2k_in2c_esper0 = Quantity(
+    x_wien2k_in2_esper0 = Quantity(
         type=np.dtype(np.float64),
         shape=[],
         description='''
-        minimum gap width; in in2c
+        minimum gap width; in in2
         ''',
-        a_legacy=LegacyDefinition(name='x_wien2k_in2c_esper0'))
+        a_legacy=LegacyDefinition(name='x_wien2k_in2_esper0'))
 
     x_wien2k_smearing_kind = Quantity(
         type=str,
         shape=[],
         description='''
-        determines how EF is determined; in in2c
+        determines how EF is determined; in in2
         ''',
         a_legacy=LegacyDefinition(name='x_wien2k_smearing_kind'))
 
@@ -744,17 +744,17 @@ class section_method(public.section_method):
         unit='joule',
         description='''
         specifies the width of the broadening, if efmod is set to ALL, eval specifies the
-        upper limit of the energy window; in in2c
+        upper limit of the energy window; in in2
         ''',
         a_legacy=LegacyDefinition(name='x_wien2k_smearing_width'))
 
-    x_wien2k_in2c_gmax = Quantity(
+    x_wien2k_in2_gmax = Quantity(
         type=np.dtype(np.float64),
         shape=[],
         description='''
-        max. G (magnitude of largest vector) in charge density Fourier expansion; in in2c
+        max. G (magnitude of largest vector) in charge density Fourier expansion; in in2
         ''',
-        a_legacy=LegacyDefinition(name='x_wien2k_in2c_gmax'))
+        a_legacy=LegacyDefinition(name='x_wien2k_in2_gmax'))
 
     x_wien2k_section_XC = SubSection(
         sub_section=SectionProxy('x_wien2k_section_XC'),

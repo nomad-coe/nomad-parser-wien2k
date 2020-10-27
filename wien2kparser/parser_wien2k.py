@@ -8,6 +8,7 @@ import sys
 from nomadcore.simple_parser import mainFunction, AncillaryParser, CachingLevel
 from nomadcore.simple_parser import SimpleMatcher as SM
 from nomadcore.local_meta_info import loadJsonFile, InfoKindEl
+from nomadcore.unit_conversion import unit_conversion
 import wien2kparser.wien2k_parser_struct as wien2k_parser_struct
 import wien2kparser.wien2k_parser_in0 as wien2k_parser_in0
 import wien2kparser.wien2k_parser_in1 as wien2k_parser_in1
@@ -133,6 +134,65 @@ class Wien2kContext(object):
         backend.addValue('single_configuration_to_calculation_method_ref', self.secMethodIndex)
         backend.addValue('single_configuration_calculation_to_system_ref', self.secSystemIndex)
 
+        mainFile = self.parser.fIn.fIn.name
+
+        eigvalKpoint=[]
+        eigvalKpointMult=[]
+        eigvalVal=[[]]
+
+        # Read eigenvalues from the energy files
+        # this can be either case.energy for non spinpolarized serial calculation
+        # case.energyup and case.energydn for spinpolarized serial calculation
+        # case.energy_x files for non spinpolarized parallel calculation
+        # case.energyup_x and case.energydn_x for spinpolarized parallel calculation
+        suffixes = ["", "up", "dn"]
+        spin = 0
+
+        for suf in suffixes:
+            for i in range(1000):
+                paraIdx = ""
+                if i != 0:
+                    paraIdx = "_" + str(i)
+                fName = mainFile[:-4] + ".energy" + suf + paraIdx
+                if os.path.exists(fName) and os.stat(fName).st_size > 0:
+                    with open(fName) as g:
+                        if suf == "dn":
+                            spin = 1
+                            if len(eigvalVal) == 1:
+                                eigvalVal.append([])
+                        else:
+                            spin = 0
+                        fromR = unit_conversion.convert_unit_function("rydberg", "J")
+                        eigvalToRead=0
+                        for l in g:
+                            if len(l) > 90:
+                                continue
+                            #there are no spaces sometime between the numbers but the format is fixed
+                            if eigvalToRead == 0:
+                                kx = float(l[0:19])
+                                ky = float(l[19:38])
+                                kz = float(l[38:57])
+                                eigvalKpointInd = int(l[57:67])
+                                if len(eigvalKpoint) == eigvalKpointInd - 1:
+                                    eigvalKpoint.append([kx, ky, kz])
+                                    eigvalKpointMult.append([int(float(l[79:84]))])
+                                if len(eigvalVal[spin]) != eigvalKpointInd -1:
+                                    break
+                                    #raise Exception("Found old eigenvalues for the current k-point while reading from %s,\
+                                    #        possible mixing of serial nad parallel runs?" % fName)
+                                eigvalToRead = int(l[73:79])
+                                eigvalVal[spin].append([])
+                            else:
+                                eigvalVal[spin][-1].append(fromR(float(l[12:31])))
+                                eigvalToRead -= 1
+                elif i > 0:
+                    break
+        if eigvalVal[0]: 
+            eigvalGIndex = backend.openSection("section_eigenvalues")
+            backend.addArrayValues("eigenvalues_values", np.asarray(eigvalVal))
+            backend.addArrayValues("eigenvalues_kpoints", np.asarray(eigvalKpoint))
+            backend.addArrayValues("eigenvalues_kpoints_multiplicity", np.asarray(eigvalKpointMult))
+            backend.closeSection("section_eigenvalues",eigvalGIndex)
 
     def onClose_section_system(self, backend, gIndex, section):
 

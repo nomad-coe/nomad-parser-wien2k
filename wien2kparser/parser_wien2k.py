@@ -55,6 +55,7 @@ class Wien2kContext(object):
         self.secSystemIndex = None
         self.scfIterNr = 0
         self.spinPol = None
+        self.eTot = None
 
     def startedParsing(self, path, parser):
         """called when parsing starts"""
@@ -128,11 +129,15 @@ class Wien2kContext(object):
 
 
     def onClose_section_single_configuration_calculation(self, backend, gIndex, section):
+
        # write number of SCF iterations
         backend.addValue('number_of_scf_iterations', self.scfIterNr)
         # write the references to section_method and section_system
         backend.addValue('single_configuration_to_calculation_method_ref', self.secMethodIndex)
         backend.addValue('single_configuration_calculation_to_system_ref', self.secSystemIndex)
+
+        if self.eTot is not None:
+            backend.addValue("energy_total", self.eTot)
 
         mainFile = self.parser.fIn.fIn.name
 
@@ -281,6 +286,10 @@ class Wien2kContext(object):
                 self.spinPol = False
             else:
                 self.spinPol = True
+        
+        eTot = section["energy_total_scf_iteration"]
+        if eTot is not None:
+            self.eTot = eTot[0]
 
 # description of the input
 mainFileDescription = SM(

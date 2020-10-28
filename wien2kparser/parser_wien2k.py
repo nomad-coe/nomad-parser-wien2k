@@ -196,18 +196,6 @@ class Wien2kContext(object):
 
     def onClose_section_system(self, backend, gIndex, section):
 
-        #backend.addValue("smearing_kind", x_fleur_smearing_kind)
-        smearing_kind = section['x_wien2k_smearing_kind']
-        if smearing_kind is not None:
-        #    value = ''
-            backend.addValue('x_wien2k_smearing_kind', value)
-
-
-        smearing_width = section['x_wien2k_smearing_width']
-        if smearing_width is not None:
-        #    value = ''
-            backend.addValue('x_wien2k_smearing_width', value)
-
         #   atom labels
         atom_labels = section['x_wien2k_atom_name']
         if atom_labels is not None:

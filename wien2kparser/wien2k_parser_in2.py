@@ -45,6 +45,15 @@ class Wien2kIn2Context(object):
         # allows to reset values if the same superContext is used to parse different files
         self.initialize_values()
 
+    def onClose_section_method(self, backend, gIndex, section):
+        smearing_kind = section['x_wien2k_smearing_kind'][0]
+        if smearing_kind is not None:
+            if 'TETRA' in smearing_kind:
+                backend.addValue('smearing_kind', 'tetrahedra')
+            elif 'TEMP' in smearing_kind:
+                backend.addValue('smearing_kind', 'fermi')
+            elif 'GAUSS' in smearing_kind:
+                backend.addValue('smearing_kind', 'gaussian')
 
 # description of the input
 def buildIn2Matchers():

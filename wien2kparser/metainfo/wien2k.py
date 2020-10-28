@@ -160,7 +160,7 @@ class section_scf_iteration(public.section_scf_iteration):
         a_legacy=LegacyDefinition(name='x_wien2k_nr_of_independent_atoms'))
 
     x_wien2k_potential_option = Quantity(
-        type=np.dtype(np.int32),
+        type=str,
         shape=[],
         description='''
         exchange correlation potential option

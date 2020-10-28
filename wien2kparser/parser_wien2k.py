@@ -318,25 +318,24 @@ mainFileDescription = SM(
                   subMatchers=[
                       SM(r":NATO\s*:\s*(?P<x_wien2k_nr_of_independent_atoms>[0-9]+)\s*INDEPENDENT AND\s*(?P<x_wien2k_total_atoms>[0-9]+)\s*TOTAL ATOMS IN UNITCELL"),
                       SM(r"\s*SUBSTANCE: (?P<x_wien2k_system_name>.*)"),
-                      SM(r":POT\s*:\s*POTENTIAL OPTION\s*(?P<x_wien2k_potential_option>[0-9]+)"),
+                      # older Wien2k versions used numerical identification for the potential
+                      # newer Wien2k versions allow to specificy separatelly the functional for calculation of both exchange and correlation potential and energy separatelly
+                      # the output can look like this, ":POT  : POTENTIAL OPTION EX_LDA EC_LDA VX_MBJ VC_LDA"
+                      SM(r":POT\s*:\s*POTENTIAL OPTION\s*(?P<x_wien2k_potential_option>[0-9 \w]+)"),
                       SM(r":LAT\s*:\s*LATTICE CONSTANTS=\s*(?P<x_wien2k_lattice_const_a>[0-9.]+)\s*(?P<x_wien2k_lattice_const_b>[0-9.]+)\s*(?P<x_wien2k_lattice_const_c>[0-9.]+)"),
                       SM(r":VOL\s*:\s*UNIT CELL VOLUME\s*=\s*(?P<x_wien2k_unit_cell_volume_bohr3>[0-9.]+)"),
                       SM(r"\s*(?P<x_wien2k_spinpolarization>(NON-)?SPINPOLARIZED) CALCULATION\s*"),
-                      SM(r":RKM  : MATRIX SIZE (?P<x_wien2k_matrix_size>[0-9]+)\s*LOs:\s*(?P<x_wien2k_LOs>[0-9.]+)\s*RKM=\s*(?P<x_wien2k_rkm>[0-9.]+)\s*WEIGHT=\s*[0-9.]*\s*\w*:"),
+                      SM(r":RKM  : MATRIX SIZE\s*(?P<x_wien2k_matrix_size>[0-9]+)\s*LOs:\s*(?P<x_wien2k_LOs>[0-9.]+)\s*RKM=\s*(?P<x_wien2k_rkm>[0-9.]+)\s*WEIGHT=\s*[0-9.]*\s*\w*:"),
                       SM(r":KPT\s*:\s*NUMBER\s*OF\s*K-POINTS:\s*(?P<x_wien2k_nr_kpts>[-+0-9.]+)"),
-                      #SM(r":GMA\s*:\s*POTENTIAL\sAND\sCHARGE\sCUT-OFF\s*(?P<x_wien2k_cutoff>[0-9.]+)\s*Ry\*\*[0-9.]+"),
-                      SM(r":GMA\s*:\s*POTENTIAL\sAND\sCHARGE\sCUT-OFF\s*(?P<x_wien2k_cutoff>[0-9.]+)\s*Ry\W\W[0-9.]+"),
                       SM(r":GAP\s*:\s*(?P<x_wien2k_ene_gap__rydberg>[-+0-9.]+)\s*Ry\s*=\s*(?P<x_wien2k_ene_gap_eV>[-+0-9.]+)\s*eV\s*.*"),
                       SM(r":NOE\s*:\s*NUMBER\sOF\sELECTRONS\s*=\s*(?P<x_wien2k_noe>[0-9.]+)"),
-                      SM(r":FER\s*:\sF E R M I -\s\w*\W\w*\WM\W*=\s*(?P<energy_reference_fermi_iteration__rydberg>[-+0-9.]+)"),
-                      SM(r":GMA\s*:\s*POTENTIAL\sAND\sCHARGE\sCUT-OFF\s*[0-9.]+\s*Ry\W\W[0-9.]+"),
+                      SM(r":FER\s*:\sF E R M I - ENERGY\W\w*\W\w*M\W*=\s*(?P<energy_reference_fermi_iteration__rydberg>[-+0-9.]+)"),
+                      SM(r":GMA\s*:\s*POTENTIAL\sAND\sCHARGE\sCUT-OFF\s*(?P<x_wien2k_cutoff>[0-9.]+)\s*Ry\W\W[0-9.]+"),
                       SM(r":CHA(?P<x_wien2k_atom_nr>[-+0-9]+):\s*TOTAL\s*\w*\s*CHARGE INSIDE SPHERE\s*(?P<x_wien2k_sphere_nr>[-+0-9]+)\s*=\s*(?P<x_wien2k_tot_val_charge_sphere>[0-9.]+)",repeats = True),
                       SM(r":CHA\s*:\s*TOTAL\s*\w*\s*CHARGE INSIDE\s*\w*\s*CELL\s=\s*(?P<x_wien2k_tot_val_charge_cell>[-+0-9.]+)"),
                       SM(r":SUM\s*:\s*SUM OF EIGENVALUES\s*=\s*(?P<energy_sum_eigenvalues_scf_iteration__rydberg>[-+0-9.]+)"),
-                      SM(r":MMTOT: TOTAL MAGNETIC MOMENT IN CELL =\s*(?P<x_wien2k_mmtot>[-+0-9.]+)"),
-                      SM(r":MMINT: MAGNETIC MOMENT IN INTERSTITIAL =\s*(?P<x_wien2k_mmint>[-+0-9.]+)"),
-                      SM(r":MMI001: MAGNETIC MOMENT IN SPHERE 1 =\s*(?P<x_wien2k_mmi001>[-+0-9.]+)"),
                       SM(r":RTO(?P<x_wien2k_atom_nr>[-+0-9]+)\s*:\s*[0-9]+\s*(?P<x_wien2k_density_at_nucleus_valence>[-+0-9.]+)\s*(?P<x_wien2k_density_at_nucleus_semicore>[-+0-9.]+)\s*(?P<x_wien2k_density_at_nucleus_core>[-+0-9.]+)\s*(?P<x_wien2k_density_at_nucleus_tot>[0-9.]+)",repeats = True),
+                      #FIXME: followig matchers work just for cases without spin polarization
                       SM(r":NTO\s*:\s*\sTOTAL\s*INTERSTITIAL\s*CHARGE=\s*(?P<x_wien2k_tot_int_charge_nm>[-+0-9.]+)"),
                       SM(r":NTO(?P<x_wien2k_atom_nr>[-+0-9]+)[0-9]*:\s*\sTOTAL\s*CHARGE\s*IN\s*SPHERE\s*(?P<x_wien2k_sphere_nr>[-+0-9]+)\s*=\s*(?P<x_wien2k_tot_charge_in_sphere_nm>[-+0-9.]+)",repeats = True),
                       SM(r":DTO(?P<x_wien2k_atom_nr>[-+0-9]+)[0-9]*:\sTOTAL\s*DIFFERENCE\s*CHARGE\W*\w*\s*IN\s*SPHERE\s*(?P<x_wien2k_sphere_nr>[-+0-9]+)\s*=\s*(?P<x_wien2k_tot_diff_charge>[-+0-9.]+)", repeats = True),
@@ -344,6 +343,11 @@ mainFileDescription = SM(
                       SM(r":CTO\s*:\s*\sTOTAL\s*INTERSTITIAL\s*CHARGE=\s*(?P<x_wien2k_tot_int_charge>[-+0-9.]+)"),
                       SM(r":CTO(?P<x_wien2k_atom_nr>[-+0-9]+)[0-9]*:\s*\sTOTAL\s*CHARGE\s*IN\s*SPHERE\s*(?P<x_wien2k_sphere_nr>[-+0-9]+)\s*=\s*(?P<x_wien2k_tot_charge_in_sphere>[-+0-9.]+)",repeats = True),
 #                      SM(r":NEC(?P<x_wien2k_necnr>[-+0-9]+)\s*:\s*NUCLEAR AND ELECTRONIC CHARGE\s*(?P<x_wien2k_nuclear_charge>[-+0-9.]+)\s*(?P<x_wien2k_electronic_charge>[0-9.]+)",repeats = True),
+                      SM(r":MMINT:\s*MAGNETIC MOMENT IN INTERSTITIAL\s*=\s*(?P<x_wien2k_mmint>[-+0-9.]+)"),
+                      #FIXME: read for all spheres
+                      SM(r":MMI001:\s*MAGNETIC MOMENT IN SPHERE\s*1\s*=\s*(?P<x_wien2k_mmi001>[-+0-9.]+)"),
+                      # its not clear if the old and new MMTOT (total magnetic moment in cell vs spin magnetic moment in cell) are the same thing?
+                      SM(r":MMTOT:\s*(TOTAL|SPIN) MAGNETIC MOMENT IN CELL\s*=\s*(?P<x_wien2k_mmtot>[-+0-9.]+)"),
                       SM(r":ENE\s*:\s*\W*\w*\W*\s*TOTAL\s*ENERGY\s*IN\s*Ry\s*=\s*(?P<energy_total_scf_iteration__rydberg>[-+0-9.]+)"),
                       SM(r":FOR[0-9]*:\s*(?P<x_wien2k_atom_nr>[0-9]+).ATOM\s*(?P<x_wien2k_for_abs>[0-9.]+)\s*(?P<x_wien2k_for_x>[-++0-9.]+)\s*(?P<x_wien2k_for_y>[-+0-9.]+)\s*(?P<x_wien2k_for_z>[-+0-9.]+)\s*partial\sforces", repeats = True),
                       SM(r":FGL[0-9]*:\s*(?P<x_wien2k_atom_nr>[0-9]+).ATOM\s*(?P<x_wien2k_for_x_gl>[-+0-9.]+)\s*(?P<x_wien2k_for_y_gl>[-+0-9.]+)\s*(?P<x_wien2k_for_z_gl>[-+0-9.]+)\s*partial\sforces", repeats = True)

@@ -761,5 +761,29 @@ class section_method(public.section_method):
         repeats=True,
         a_legacy=LegacyDefinition(name='x_wien2k_section_XC'))
 
+    x_wien2k_in2c_switch = Quantity(
+        type=str,
+        a_legacy=LegacyDefinition(name='x_wien2k_in2c_switch'))
+
+    x_wien2k_in2c_emin = Quantity(
+        type=np.dtype(np.float64),
+        a_legacy=LegacyDefinition(name='x_wien2k_in2c_emin'))
+
+    x_wien2k_in2c_ne = Quantity(
+        type=np.dtype(np.float64),
+        a_legacy=LegacyDefinition(name='x_wien2k_in2c_ne'))
+
+    x_wien2k_in2c_espermin = Quantity(
+        type=np.dtype(np.float64),
+        a_legacy=LegacyDefinition(name='x_wien2k_in2c_espermin'))
+
+    x_wien2k_in2c_esper0 = Quantity(
+        type=np.dtype(np.float64),
+        a_legacy=LegacyDefinition(name='x_wien2k_in2c_esper0'))
+
+    x_wien2k_in2c_gmax = Quantity(
+        type=np.dtype(np.float64),
+        a_legacy=LegacyDefinition(name='x_wien2k_in2c_gmax'))
+
 
 m_package.__init_metainfo__()

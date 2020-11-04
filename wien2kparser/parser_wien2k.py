@@ -136,6 +136,7 @@ class Wien2kContext(object):
         # write the references to section_method and section_system
         backend.addValue('single_configuration_to_calculation_method_ref', self.secMethodIndex)
         backend.addValue('single_configuration_calculation_to_system_ref', self.secSystemIndex)
+        fromR = unit_conversion.convert_unit_function("rydberg", "J")
 
         if self.eTot is not None:
             backend.addValue("energy_total", self.eTot)
@@ -154,7 +155,12 @@ class Wien2kContext(object):
         # case.energyup and case.energydn for spinpolarized serial calculation
         # case.energy_x files for non spinpolarized parallel calculation
         # case.energyup_x and case.energydn_x for spinpolarized parallel calculation
-        suffixes = ["", "up", "dn"]
+        if self.spinPol == None:
+            suffixes = ["", "up", "dn"]
+        elif self.spinPol:
+            suffixes = ["up", "dn"]
+        else:
+            suffixes = [""]
         spin = 0
 
         for suf in suffixes:
@@ -171,7 +177,6 @@ class Wien2kContext(object):
                                 eigvalVal.append([])
                         else:
                             spin = 0
-                        fromR = unit_conversion.convert_unit_function("rydberg", "J")
                         eigvalToRead=0
                         for l in g:
                             if len(l) > 90:
@@ -202,6 +207,57 @@ class Wien2kContext(object):
             backend.addArrayValues("eigenvalues_kpoints", np.asarray(eigvalKpoint))
             backend.addArrayValues("eigenvalues_kpoints_multiplicity", np.asarray(eigvalKpointMult))
             backend.closeSection("section_eigenvalues",eigvalGIndex)
+
+        #iterate over all dos files, for now just the total dos is supported
+        spin = 0
+        DOS = [[]]
+        ene = []
+        eneNorm = []
+        for suf in suffixes:
+            for n in range(1,50):
+                fName = mainFile[:-4] + ".dos" + str(n) + suf
+                if os.path.exists(fName):
+                    #read the DOS file
+                    with open(fName) as f:
+                        if suf == "dn":
+                            spin = 1
+                            if len(DOS) == 1:
+                                DOS.append([])
+                        ene = []
+                        eneNorm = []
+                        Ef = 0.0
+                        totDOScol = 0
+                        for i,l in enumerate(f):
+                            l = l.split()
+                            if i == 1:
+                                Ef = float(l[1])
+                            if i == 2:
+                                #find out which column is the total DOS
+                                for j,w in enumerate(l):
+                                    if "total-DOS" in w or "TOTAL" in w:
+                                        totDOScol = j - 1
+                                        break
+                                # there is no total DOS column here
+                                if totDOScol == 0:
+                                    break
+                            if i > 2:
+                                ene.append(fromR(float(l[0])))
+                                eneNorm.append(fromR(float(l[0]) - Ef))
+                                DOS[spin].append(float(l[totDOScol]) / fromR(1.0))
+                    # we found the total DOS, ignore the rest of files
+                    if DOS[spin]:
+                        break
+                else:
+                    break
+        if DOS[0]:
+            DOSGIndex = backend.openSection("section_dos")
+            backend.addArrayValues("dos_energies", np.asarray(ene))
+            backend.addArrayValues("dos_energies_normalized", np.asarray(eneNorm))
+            backend.addArrayValues("dos_values", np.asarray(DOS))
+            backend.addValue("dos_kind", "electronic")
+            backend.addValue("number_of_dos_values", len(DOS[0]))
+            backend.closeSection("section_dos",DOSGIndex)
+
 
     def onClose_section_system(self, backend, gIndex, section):
 

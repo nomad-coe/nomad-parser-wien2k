@@ -56,6 +56,7 @@ class Wien2kContext(object):
         self.scfIterNr = 0
         self.spinPol = None
         self.eTot = None
+        self.forces = None
 
     def startedParsing(self, path, parser):
         """called when parsing starts"""
@@ -139,6 +140,9 @@ class Wien2kContext(object):
         if self.eTot is not None:
             backend.addValue("energy_total", self.eTot)
 
+        if self.forces is not None:
+           backend.addArrayValues('atom_forces', self.forces)
+
         mainFile = self.parser.fIn.fIn.name
 
         eigvalKpoint=[]
@@ -205,16 +209,6 @@ class Wien2kContext(object):
         atom_labels = section['x_wien2k_atom_name']
         if atom_labels is not None:
            backend.addArrayValues('atom_labels', np.asarray(atom_labels))
-
-        # atom force
-        atom_force = []
-        for i in ['x', 'y', 'z']:
-            api = section['x_wien2k_for_' + i]
-            if api is not None:
-               atom_force.append(api)
-        if atom_force:
-            # need to transpose array since its shape is [number_of_atoms,3] in\the metadata
-           backend.addArrayValues('atom_forces', np.transpose(np.asarray(atom_force)))
 
         # Parse the structure file
         mainFile = self.parser.fIn.fIn.name
@@ -291,6 +285,22 @@ class Wien2kContext(object):
         if eTot is not None:
             self.eTot = eTot[0]
 
+        # save the forces
+        fx = section['x_wien2k_for_x_gl']
+        fy = section['x_wien2k_for_y_gl']
+        fz = section['x_wien2k_for_z_gl']
+        if fx is not None and fy is not None and fz is not None:
+            backend.addArrayValues('x_wien2k_for_x_gl', fx)
+            backend.addArrayValues('x_wien2k_for_y_gl', fy)
+            backend.addArrayValues('x_wien2k_for_z_gl', fz)
+            # account for atom multiplicities
+            self.forces=[]
+            for i,a in enumerate(section['x_wien2k_atom_mult']):
+                for _ in range(a):
+                    self.forces.append([fx[i], fy[i], fz[i]])
+            print (self.forces)
+
+
 # description of the input
 mainFileDescription = SM(
     name = 'root',
@@ -331,8 +341,10 @@ mainFileDescription = SM(
                       SM(r":NOE\s*:\s*NUMBER\sOF\sELECTRONS\s*=\s*(?P<x_wien2k_noe>[0-9.]+)"),
                       SM(r":FER\s*:\sF E R M I - ENERGY\W\w*\W\w*M\W*=\s*(?P<energy_reference_fermi_iteration__rydberg>[-+0-9.]+)"),
                       SM(r":GMA\s*:\s*POTENTIAL\sAND\sCHARGE\sCUT-OFF\s*(?P<x_wien2k_cutoff>[0-9.]+)\s*Ry\W\W[0-9.]+"),
-                      SM(r":CHA(?P<x_wien2k_atom_nr>[-+0-9]+):\s*TOTAL\s*\w*\s*CHARGE INSIDE SPHERE\s*(?P<x_wien2k_sphere_nr>[-+0-9]+)\s*=\s*(?P<x_wien2k_tot_val_charge_sphere>[0-9.]+)",repeats = True),
-                      SM(r":CHA\s*:\s*TOTAL\s*\w*\s*CHARGE INSIDE\s*\w*\s*CELL\s=\s*(?P<x_wien2k_tot_val_charge_cell>[-+0-9.]+)"),
+                      SM(r":POS[0-9]*:\s*ATOM\s*[-0-9.]+\s*X,Y,Z\s*=[-0-9. ]+MULT=\s*(?P<x_wien2k_atom_mult>[0-9]+)\s*ZZ=\s*[0-9.]+.*", repeats = True),
+                      #FIXME: this is repeating interleaved with the previous matcher and likely need its own submatcher 
+#                     SM(r":CHA(?P<x_wien2k_atom_nr>[-+0-9]+):\s*TOTAL\s*\w*\s*CHARGE INSIDE SPHERE\s*(?P<x_wien2k_sphere_nr>[-+0-9]+)\s*=\s*(?P<x_wien2k_tot_val_charge_sphere>[0-9.]+)",repeats = True),
+#                      SM(r":CHA\s*:\s*TOTAL\s*\w*\s*CHARGE INSIDE\s*\w*\s*CELL\s=\s*(?P<x_wien2k_tot_val_charge_cell>[-+0-9.]+)"),
                       SM(r":SUM\s*:\s*SUM OF EIGENVALUES\s*=\s*(?P<energy_sum_eigenvalues_scf_iteration__rydberg>[-+0-9.]+)"),
                       SM(r":RTO(?P<x_wien2k_atom_nr>[-+0-9]+)\s*:\s*[0-9]+\s*(?P<x_wien2k_density_at_nucleus_valence>[-+0-9.]+)\s*(?P<x_wien2k_density_at_nucleus_semicore>[-+0-9.]+)\s*(?P<x_wien2k_density_at_nucleus_core>[-+0-9.]+)\s*(?P<x_wien2k_density_at_nucleus_tot>[0-9.]+)",repeats = True),
                       #FIXME: followig matchers work just for cases without spin polarization
@@ -350,7 +362,7 @@ mainFileDescription = SM(
                       SM(r":MMTOT:\s*(TOTAL|SPIN) MAGNETIC MOMENT IN CELL\s*=\s*(?P<x_wien2k_mmtot>[-+0-9.]+)"),
                       SM(r":ENE\s*:\s*\W*\w*\W*\s*TOTAL\s*ENERGY\s*IN\s*Ry\s*=\s*(?P<energy_total_scf_iteration__rydberg>[-+0-9.]+)"),
                       SM(r":FOR[0-9]*:\s*(?P<x_wien2k_atom_nr>[0-9]+).ATOM\s*(?P<x_wien2k_for_abs>[0-9.]+)\s*(?P<x_wien2k_for_x>[-++0-9.]+)\s*(?P<x_wien2k_for_y>[-+0-9.]+)\s*(?P<x_wien2k_for_z>[-+0-9.]+)\s*partial\sforces", repeats = True),
-                      SM(r":FGL[0-9]*:\s*(?P<x_wien2k_atom_nr>[0-9]+).ATOM\s*(?P<x_wien2k_for_x_gl>[-+0-9.]+)\s*(?P<x_wien2k_for_y_gl>[-+0-9.]+)\s*(?P<x_wien2k_for_z_gl>[-+0-9.]+)\s*partial\sforces", repeats = True)
+                      SM(r":FGL[0-9]*:\s*(?P<x_wien2k_atom_nr>[0-9]+).ATOM\s*(?P<x_wien2k_for_x_gl__mrydberg_bohr_1>[-+0-9.]+)\s*(?P<x_wien2k_for_y_gl__mrydberg_bohr_1>[-+0-9.]+)\s*(?P<x_wien2k_for_z_gl__mrydberg_bohr_1>[-+0-9.]+)\s*total\sforces", repeats = True),
                   ]
               )
            ]

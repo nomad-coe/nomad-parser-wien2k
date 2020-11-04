@@ -152,8 +152,7 @@ class section_scf_iteration(public.section_scf_iteration):
         a_legacy=LegacyDefinition(name='x_wien2k_iteration_number'))
 
     x_wien2k_nr_of_independent_atoms = Quantity(
-        type=np.dtype(np.int32),
-        shape=[],
+        type=int,
         description='''
         number of independent atoms in the cell
         ''',
@@ -377,27 +376,27 @@ class section_scf_iteration(public.section_scf_iteration):
 
     x_wien2k_for_x_gl = Quantity(
         type=np.dtype(np.float64),
-        shape=[],
+        shape=['x_wien2k_nr_of_independent_atoms'],
         description='''
-        force on atom xx in mRy/bohr (in the global coordinate system of the unit cell (in
+        force on inequivalent atom xx (in the global coordinate system of the unit cell (in
         the same way as the atomic positions are specified)): Fx
         ''',
         a_legacy=LegacyDefinition(name='x_wien2k_for_x_gl'))
 
     x_wien2k_for_y_gl = Quantity(
         type=np.dtype(np.float64),
-        shape=[],
+        shape=['x_wien2k_nr_of_independent_atoms'],
         description='''
-        force on atom xx in mRy/bohr (in the global coordinate system of the unit cell (in
+        force on inequivalent atom xx in (in the global coordinate system of the unit cell (in
         the same way as the atomic positions are specified)): Fy
         ''',
         a_legacy=LegacyDefinition(name='x_wien2k_for_y_gl'))
 
     x_wien2k_for_z_gl = Quantity(
         type=np.dtype(np.float64),
-        shape=[],
+        shape=['x_wien2k_nr_of_independent_atoms'],
         description='''
-        force on atom xx in mRy/bohr (in the global coordinate system of the unit cell (in
+        force on inequivalent atom xx in (in the global coordinate system of the unit cell (in
         the same way as the atomic positions are specified)): Fz
         ''',
         a_legacy=LegacyDefinition(name='x_wien2k_for_z_gl'))
@@ -409,6 +408,14 @@ class section_scf_iteration(public.section_scf_iteration):
         number of atom, labelling atoms
         ''',
         a_legacy=LegacyDefinition(name='x_wien2k_atom_nr'))
+
+    x_wien2k_atom_mult = Quantity(
+        type=np.dtype(np.int32),
+        shape=['x_wien2k_nr_of_independent_atoms'],
+        description='''
+        atom multiplicity
+        ''',
+        a_legacy=LegacyDefinition(name='x_wien2k_atom_mult'))
 
     x_wien2k_sphere_nr = Quantity(
         type=str,

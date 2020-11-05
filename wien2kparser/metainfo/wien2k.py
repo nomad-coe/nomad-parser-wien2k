@@ -222,24 +222,6 @@ class section_scf_iteration(public.section_scf_iteration):
         ''',
         a_legacy=LegacyDefinition(name='x_wien2k_spinpolarization'))
 
-    x_wien2k_energy_total = Quantity(
-        type=np.dtype(np.float64),
-        shape=[],
-        unit='joule',
-        description='''
-        energy total
-        ''',
-        a_legacy=LegacyDefinition(name='x_wien2k_energy_total'))
-
-    x_wien2k_fermi_ene = Quantity(
-        type=np.dtype(np.float64),
-        shape=[],
-        unit='joule',
-        description='''
-        Fermi energy
-        ''',
-        a_legacy=LegacyDefinition(name='x_wien2k_fermi_ene'))
-
     x_wien2k_noe = Quantity(
         type=np.dtype(np.float64),
         shape=[],
@@ -751,16 +733,6 @@ class section_method(public.section_method):
         determines how EF is determined; in in2
         ''',
         a_legacy=LegacyDefinition(name='x_wien2k_smearing_kind'))
-
-    x_wien2k_smearing_width = Quantity(
-        type=np.dtype(np.float64),
-        shape=[],
-        unit='joule',
-        description='''
-        specifies the width of the broadening, if efmod is set to ALL, eval specifies the
-        upper limit of the energy window; in in2
-        ''',
-        a_legacy=LegacyDefinition(name='x_wien2k_smearing_width'))
 
     x_wien2k_in2_gmax = Quantity(
         type=np.dtype(np.float64),

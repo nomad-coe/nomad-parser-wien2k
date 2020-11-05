@@ -46,14 +46,14 @@ class Wien2kIn0Context(object):
         self.initialize_values()
 
     def onClose_x_wien2k_section_XC(self, backend, gIndex, section):
-        xc_index = section["x_wien2k_indxc"]   #[0]
-        #logging.error("winsectxc: %s -> %s", section, xc_index)
-        if not xc_index:
-            xc_index = ["XC_PBE"]
+        # this is quite tricky, see lapw0 section in http://www.wien2k.at/reg_user/textbooks/usersguide.pdf
+        # in general Wien2k allows to specify different functional for exchange and correlation potential and energy
+        # as well as using libxc and combining libxc together with Wien2k impementations
+        # Only parsing of global XC_*** and old numerical keywords (deprecated in new Wien2k) is supported right now
         xc_map_legend = {
 
-            '5': ['LDA_C_PW_RPA'],
-            'XC_LDA': ['LDA_X_2D'],
+            '5': ['LDA_X', 'LDA_C_PW'],
+            'XC_LDA': ['LDA_X', 'LDA_C_PW'],
 
             '13': ['GGA_X_PBE', 'GGA_C_PBE'],
             'XC_PBE':['GGA_X_PBE', 'GGA_C_PBE'],
@@ -61,15 +61,15 @@ class Wien2kIn0Context(object):
             '19': ['GGA_X_PBE_SOL', 'GGA_C_PBE_SOL'],
             'XC_PBESOL': ['GGA_X_PBE_SOL', 'GGA_C_PBE_SOL'],
 
-            '11': ['GGA_X_WC'],
-            'XC_WC': ['GGA_X_WC'],
+            '11': ['GGA_X_WC', 'GGA_C_PBE'],
+            'XC_WC': ['GGA_X_WC', 'GGA_C_PBE'],
 
             '17': ['GGA_X_PW91'],
             'EC_PW91': ['GGA_X_PW91'],
             'VC_PW91': ['GGA_X_PW91'],
 
-            '28': ['MGGA_X_TB09'],
-            'XC_MBJ': ['MGGA_X_TB09'],
+            '28': ['MGGA_X_TB09', 'LDA_C_PW'],
+            'XC_MBJ': ['MGGA_X_TB09', 'LDA_C_PW'],
 
             '29': ['MGGA_C_REVTPSS, GGA_C_REGTPSS'],
             'XC_REVTPSS': ['MGGA_C_REVTPSS, GGA_C_REGTPSS'],
@@ -118,12 +118,15 @@ class Wien2kIn0Context(object):
             'VX_LDA': ['HF_X']
         }
 
-        # Push the functional string into the backend
-        xc_map_legend = xc_map_legend.get(xc_index[0])
+        xc_index = section["x_wien2k_indxc"]   #[0]
+        if not xc_index:
+            xc_map_legend = ['UNKNOWN']
+        else:
+            xc_map_legend = xc_map_legend.get(xc_index[0])
         if not xc_map_legend:
-            raise Exception("Unhandled xc functional %s found" % xc_index)
+            xc_map_legend = ['UNKNOWN']
 
-
+        # Push the functional string into the backend
         for xc_name in xc_map_legend:
             #  for xc_name in xc_map_legend[xc_index]:
             s = backend.openSection("section_XC_functionals")

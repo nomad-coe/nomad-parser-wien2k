@@ -201,6 +201,26 @@ class Wien2kContext(object):
             else:
                 backend.addValue("number_of_spin_channels", 1)
 
+        mainFile = self.parser.fIn.fIn.name
+
+        #read kpoints from the klist file
+        klistFile = mainFile[:-4] + ".klist"
+        if os.path.exists(klistFile):
+            with open(klistFile) as f:
+                kMeshWeights=[]
+                weightsSum=0.0
+                kMeshPoints=[]
+                for l in f:
+                    tmp = l.split()
+                    if len(tmp) >= 6:
+                        kMeshWeights.append(float(tmp[5]))
+                        weightsSum += kMeshWeights[-1]
+                        kMeshPoints.append([float(tmp[1])/float(tmp[4]), float(tmp[2])/float(tmp[4]), float(tmp[3])/float(tmp[4])])
+                    elif tmp[0] == 'END': break
+                kMeshWeights = [w/weightsSum for w in kMeshWeights]
+                backend.addArrayValues("k_mesh_points", np.asarray(kMeshPoints))
+                backend.addArrayValues("k_mesh_weights", np.asarray(kMeshWeights))
+
     def onClose_section_scf_iteration(self, backend, gIndex, section):
         #Trigger called when section_scf_iteration is closed.
 

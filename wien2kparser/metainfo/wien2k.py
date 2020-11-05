@@ -216,6 +216,13 @@ class section_scf_iteration(public.section_scf_iteration):
         ''',
         a_legacy=LegacyDefinition(name='x_wien2k_unit_cell_volume_bohr3'))
 
+    x_wien2k_spinpolarization = Quantity(
+        type=str,
+        description='''
+        spinpolarization treatment
+        ''',
+        a_legacy=LegacyDefinition(name='x_wien2k_spinpolarization'))
+
     x_wien2k_energy_total = Quantity(
         type=np.dtype(np.float64),
         shape=[],

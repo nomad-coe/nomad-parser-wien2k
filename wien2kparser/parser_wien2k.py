@@ -53,6 +53,7 @@ class Wien2kContext(object):
         self.secMethodIndex = None
         self.secSystemIndex = None
         self.scfIterNr = 0
+        self.spinPol = None
 
     def startedParsing(self, path, parser):
         """called when parsing starts"""
@@ -191,11 +192,27 @@ class Wien2kContext(object):
                     superContext = structSuperContext)
                 structParser.parseFile(fin)
 
+    def onClose_section_method(self, backend, gIndex, section):
+        #Trigger called when section_method is closed.
+
+        if self.spinPol is not None:
+            if self.spinPol:
+                backend.addValue("number_of_spin_channels", 2)
+            else:
+                backend.addValue("number_of_spin_channels", 1)
+
     def onClose_section_scf_iteration(self, backend, gIndex, section):
         #Trigger called when section_scf_iteration is closed.
 
         # count number of SCF iterations
         self.scfIterNr += 1
+
+        sp = section["x_wien2k_spinpolarization"]
+        if sp is not None:
+            if "NON" in sp[0]:
+                self.spinPol = False
+            else:
+                self.spinPol = True
 
 # description of the input
 mainFileDescription = SM(
@@ -227,6 +244,7 @@ mainFileDescription = SM(
                       SM(r":POT\s*:\s*POTENTIAL OPTION\s*(?P<x_wien2k_potential_option>[0-9]+)"),
                       SM(r":LAT\s*:\s*LATTICE CONSTANTS=\s*(?P<x_wien2k_lattice_const_a>[0-9.]+)\s*(?P<x_wien2k_lattice_const_b>[0-9.]+)\s*(?P<x_wien2k_lattice_const_c>[0-9.]+)"),
                       SM(r":VOL\s*:\s*UNIT CELL VOLUME\s*=\s*(?P<x_wien2k_unit_cell_volume_bohr3>[0-9.]+)"),
+                      SM(r"\s*(?P<x_wien2k_spinpolarization>(NON-)?SPINPOLARIZED) CALCULATION\s*"),
                       SM(r":RKM  : MATRIX SIZE (?P<x_wien2k_matrix_size>[0-9]+)\s*LOs:\s*(?P<x_wien2k_LOs>[0-9.]+)\s*RKM=\s*(?P<x_wien2k_rkm>[0-9.]+)\s*WEIGHT=\s*[0-9.]*\s*\w*:"),
                       SM(r":KPT\s*:\s*NUMBER\s*OF\s*K-POINTS:\s*(?P<x_wien2k_nr_kpts>[-+0-9.]+)"),
                       #SM(r":GMA\s*:\s*POTENTIAL\sAND\sCHARGE\sCUT-OFF\s*(?P<x_wien2k_cutoff>[0-9.]+)\s*Ry\*\*[0-9.]+"),

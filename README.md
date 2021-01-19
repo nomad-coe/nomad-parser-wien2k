@@ -62,7 +62,15 @@ python_dict = section_run.m_to_dict()
 
 ## Developing the parser
 
-Also install NOMAD's pypi package:
+Create a virtual environment to install the parser in development mode:
+
+```
+pip install virtualenv
+virtualenv -p `which python3` .pyenv
+source .pyenv/bin/activate
+```
+
+Install NOMAD's pypi package:
 
 ```
 pip install nomad-lab
@@ -71,10 +79,8 @@ pip install nomad-lab
 Clone the parser project and install it in development mode:
 
 ```
-git clone https://gitlab.mpcdf.mpg.de/nomad-lab/parser-wien2k parser-wien2k
-pip install -e parser-wien2k
+git clone https://github.com/nomad-coe/nomad-parser-wien2k.git nomad-parser-wien2k
+pip install -e nomad-parser-wien2k
 ```
 
 Running the parser now, will use the parser's Python code from the clone project.
-
-

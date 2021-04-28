@@ -322,6 +322,14 @@ class section_scf_iteration(public.section_scf_iteration):
         ''',
         a_legacy=LegacyDefinition(name='x_wien2k_mmint'))
 
+    x_wien2k_mmi = Quantity(
+        type=np.dtype(np.float64),
+        shape=['x_wien2k_nr_of_independent_atoms'],
+        description='''
+        magnetic moment inside the sphere
+        ''',
+        a_legacy=LegacyDefinition(name='x_wien2k_mmi'))
+
     x_wien2k_mmi001 = Quantity(
         type=np.dtype(np.float64),
         shape=[],
@@ -340,12 +348,21 @@ class section_scf_iteration(public.section_scf_iteration):
 
     x_wien2k_for_abs = Quantity(
         type=np.dtype(np.float64),
-        shape=[],
+        shape=['x_wien2k_nr_of_independent_atoms'],
         description='''
         force on atom xx in mRy/bohr (in the local (for each atom) cartesian coordinate
         system): |F|
         ''',
         a_legacy=LegacyDefinition(name='x_wien2k_for_abs'))
+
+    x_wien2k_for = Quantity(
+        type=np.dtype(np.float64),
+        shape=['x_wien2k_nr_of_independent_atoms', 3],
+        description='''
+        forces on inequivalent atoms in mRy/bohr (in the local (for each atom) cartesian coordinate
+        system)
+        ''',
+        a_legacy=LegacyDefinition(name='x_wien2k_for'))
 
     x_wien2k_for_x = Quantity(
         type=np.dtype(np.float64),
@@ -373,6 +390,15 @@ class section_scf_iteration(public.section_scf_iteration):
         system): Fz
         ''',
         a_legacy=LegacyDefinition(name='x_wien2k_for_z'))
+
+    x_wien2k_for_gl = Quantity(
+        type=np.dtype(np.float64),
+        shape=['x_wien2k_nr_of_independent_atoms', 3],
+        description='''
+        force on inequivalent atoms (in the global coordinate system of the unit cell (in
+        the same way as the atomic positions are specified))
+        ''',
+        a_legacy=LegacyDefinition(name='x_wien2k_for_gl'))
 
     x_wien2k_for_x_gl = Quantity(
         type=np.dtype(np.float64),
@@ -427,7 +453,7 @@ class section_scf_iteration(public.section_scf_iteration):
 
     x_wien2k_tot_diff_charge = Quantity(
         type=np.dtype(np.float64),
-        shape=[],
+        shape=['x_wien2k_nr_of_independent_atoms'],
         description='''
         total difference charge density for atom xx between last 2 iterations
         ''',
@@ -443,7 +469,7 @@ class section_scf_iteration(public.section_scf_iteration):
 
     x_wien2k_tot_charge_in_sphere = Quantity(
         type=np.dtype(np.float64),
-        shape=[],
+        shape=['x_wien2k_nr_of_independent_atoms'],
         description='''
         total charge in sphere xx (mixed after MIXER)
         ''',
@@ -459,7 +485,7 @@ class section_scf_iteration(public.section_scf_iteration):
 
     x_wien2k_tot_charge_in_sphere_nm = Quantity(
         type=np.dtype(np.float64),
-        shape=[],
+        shape=['x_wien2k_nr_of_independent_atoms'],
         description='''
         total charge in sphere xx (new (not mixed) from LAPW2+LCORE
         ''',
@@ -483,7 +509,7 @@ class section_scf_iteration(public.section_scf_iteration):
 
     x_wien2k_density_at_nucleus_valence = Quantity(
         type=np.dtype(np.float64),
-        shape=[],
+        shape=['x_wien2k_nr_of_independent_atoms'],
         description='''
         density for atom xx at the nucleus (first radial mesh point); valence
         ''',
@@ -491,7 +517,7 @@ class section_scf_iteration(public.section_scf_iteration):
 
     x_wien2k_density_at_nucleus_semicore = Quantity(
         type=np.dtype(np.float64),
-        shape=[],
+        shape=['x_wien2k_nr_of_independent_atoms'],
         description='''
         density for atom xx at the nucleus (first radial mesh point); semi-core
         ''',
@@ -499,7 +525,7 @@ class section_scf_iteration(public.section_scf_iteration):
 
     x_wien2k_density_at_nucleus_core = Quantity(
         type=np.dtype(np.float64),
-        shape=[],
+        shape=['x_wien2k_nr_of_independent_atoms'],
         description='''
         density for atom xx at the nucleus (first radial mesh point); core
         ''',
@@ -507,7 +533,7 @@ class section_scf_iteration(public.section_scf_iteration):
 
     x_wien2k_density_at_nucleus_tot = Quantity(
         type=np.dtype(np.float64),
-        shape=[],
+        shape=['x_wien2k_nr_of_independent_atoms'],
         description='''
         density for atom xx at the nucleus (first radial mesh point); total
         ''',
@@ -515,7 +541,7 @@ class section_scf_iteration(public.section_scf_iteration):
 
     x_wien2k_nuclear_charge = Quantity(
         type=np.dtype(np.float64),
-        shape=[],
+        shape=['x_wien2k_nr_of_independent_atoms'],
         description='''
         nuclear and electronic charge; normalization check of electronic charge densities.
         If a significant amount of electrons is missing, one might have core states, whose
@@ -526,7 +552,7 @@ class section_scf_iteration(public.section_scf_iteration):
 
     x_wien2k_electronic_charge = Quantity(
         type=np.dtype(np.float64),
-        shape=[],
+        shape=['x_wien2k_nr_of_independent_atoms'],
         description='''
         nuclear and electronic charge; normalization check of electronic charge densities.
         If a significant amount of electrons is missing, one might have core states, whose
@@ -640,6 +666,15 @@ class section_method(public.section_method):
         switch in in0 between TOT, KXC, POT, MULT, COUL, EXCH
         ''',
         a_legacy=LegacyDefinition(name='x_wien2k_switch'))
+
+    x_wien2k_ifft = Quantity(
+        type=np.dtype(np.int32),
+        shape=[3],
+        description='''
+        FFT-mesh parameters in x direction for the calculation of the XC-potential in the
+        interstitial region, in in0
+        ''',
+        a_legacy=LegacyDefinition(name='x_wien2k_ifft'))
 
     x_wien2k_ifft_x = Quantity(
         type=np.dtype(np.int32),

@@ -590,7 +590,7 @@ class Wien2kParser(FairdiParser):
         for key, val in self.struct_parser.get('lattice', {}).items():
             setattr(sec_system, 'x_wien2k_%s' % key, val)
 
-        for atom in self.struct_parser.get('atom'):
+        for atom in self.struct_parser.get('atom', []):
             sec_atom = sec_system.m_create(x_wien2k_section_equiv_atoms)
             for key, val in atom.items():
                 setattr(sec_atom, 'x_wien2k_%s' % key, val)

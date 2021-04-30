@@ -23,6 +23,10 @@ from nomad.datamodel import EntryArchive
 from wien2kparser import Wien2kParser
 
 
+def approx(value, abs=0, rel=1e-6):
+    return pytest.approx(value, abs=abs, rel=rel)
+
+
 @pytest.fixture(scope='module')
 def parser():
     return Wien2kParser()
@@ -44,20 +48,20 @@ def test_single_point(parser):
     assert sec_method.x_wien2k_in2_espermin == 0.50
 
     sec_scc = archive.section_run[0].section_single_configuration_calculation[0]
-    assert sec_scc.energy_total.magnitude == pytest.approx(-8.09654094e-15)
+    assert sec_scc.energy_total.magnitude == approx(-8.09654094e-15)
     assert np.shape(sec_scc.atom_forces) == (49, 3)
-    assert sec_scc.atom_forces[19][1].magnitude == pytest.approx(-2.76650574e-10)
-    assert sec_scc.energy_reference_fermi[0].magnitude == pytest.approx(-4.46784636e-19)
+    assert sec_scc.atom_forces[19][1].magnitude == approx(-2.76650574e-10)
+    assert sec_scc.energy_reference_fermi[0].magnitude == approx(-4.46784636e-19)
     sec_scfs = sec_scc.section_scf_iteration
     assert len(sec_scfs) == 40
-    assert sec_scfs[21].energy_total_scf_iteration.magnitude == pytest.approx(-4.47214106e-19)
+    assert sec_scfs[21].energy_total_scf_iteration.magnitude == approx(-8.09654095e-15)
     assert sec_scfs[6].x_wien2k_noe == 196.000
-    assert sec_scfs[17].x_wien2k_tot_diff_charge[9] == pytest.approx(0.0001539)
+    assert sec_scfs[17].x_wien2k_tot_diff_charge[9] == approx(0.0001539)
 
     sec_system = archive.section_run[0].section_system[0]
     assert np.shape(sec_system.atom_positions) == (49, 3)
-    assert sec_system.atom_positions[18][1].magnitude == pytest.approx(9.94126646e-10)
-    assert sec_system.lattice_vectors[1][1].magnitude == pytest.approx(1.06500038e-09)
+    assert sec_system.atom_positions[18][1].magnitude == approx(9.94126646e-10)
+    assert sec_system.lattice_vectors[1][1].magnitude == approx(1.06500038e-09)
     assert sec_system.atom_labels == ['C'] * 49
 
 
@@ -68,12 +72,12 @@ def test_eigenvalues(parser):
     sec_eigenvalues = archive.section_run[0].section_single_configuration_calculation[0].section_eigenvalues[0]
     assert np.shape(sec_eigenvalues.eigenvalues_values) == (1, 8, 315)
     assert np.shape(sec_eigenvalues.eigenvalues_kpoints) == (8, 3)
-    assert sec_eigenvalues.eigenvalues_values[0][2][31].magnitude == pytest.approx(-2.98121062e-18)
+    assert sec_eigenvalues.eigenvalues_values[0][2][31].magnitude == approx(-2.98121062e-18)
     assert sec_eigenvalues.eigenvalues_kpoints[7][0] == 0.375
     assert sec_eigenvalues.eigenvalues_kpoints_multiplicity[6] == 8
 
     sec_dos = archive.section_run[0].section_single_configuration_calculation[0].section_dos[0]
     assert np.shape(sec_dos.dos_values) == (1, 1251)
     assert len(sec_dos.dos_energies) == 1251
-    assert sec_dos.dos_values[0][1178] == pytest.approx(5.93635529e+19)
-    assert sec_dos.dos_energies[285].magnitude == pytest.approx(-9.37345115e-19)
+    assert sec_dos.dos_values[0][1178] == approx(5.93635529e+19)
+    assert sec_dos.dos_energies[285].magnitude == approx(-9.37345115e-19)

@@ -28,7 +28,8 @@ from nomad.units import ureg
 from nomad.parsing import FairdiParser
 from nomad.parsing.file_parser import TextParser, Quantity
 from nomad.datamodel.metainfo.common_dft import Run, Method, System, XCFunctionals,\
-    SingleConfigurationCalculation, ScfIteration, Eigenvalues, SamplingMethod, Dos
+    SingleConfigurationCalculation, ScfIteration, Eigenvalues, SamplingMethod, Dos,\
+    SpeciesProjectedDos
 
 from wien2kparser.metainfo import m_env
 from wien2kparser.metainfo.wien2k import x_wien2k_section_equiv_atoms
@@ -133,6 +134,17 @@ class In2Parser(TextParser):
             Quantity('emin', r'([\d\.\- ]+)\s*EMIN'),
             Quantity('smearing', r'(GAUSS|ROOT|TEMP|TETRA|ALL)\s*([\d\.]+)'),
             Quantity('gmax', r'([\d\.\-]+)\s*GMAX')]
+
+
+class DosParser(TextParser):
+    def __init__(self):
+        super().__init__()
+
+    def init_quantities(self):
+        re_f = r'\-*\d+\.\d+'
+        self._quantities = [
+            Quantity('labels', r'# ENERGY +(.+)', flatten=False),
+            Quantity('data', rf'({re_f} +{re_f}.*)', repeats=True, dtype=np.dtype(np.float64))]
 
 
 class OutParser(TextParser):
@@ -375,7 +387,8 @@ class Wien2kParser(FairdiParser):
             'XC_PBESOL': ['GGA_X_PBE_SOL', 'GGA_C_PBE_SOL'],
             'XC_B3PW91': ['HYB_GGA_XC_B3PW91'],
             'XC_B3LYP': ['HYB_GGA_XC_B3LYP'],
-            'XC_MBJ': ['LDA_X', 'LDA_C_PW'],
+            # see issue #1, not sure where TB09 comes from
+            'XC_MBJ': ['MGGA_X_TB09', 'LDA_C_PW'],
             'XC_LMBJ': ['LDA_X', 'LDA_C_PW'],
             'XC_TPSS': ['MGGA_X_TPSS', 'MGGA_C_TPSS'],
             'XC_REVTPSS': ['MGGA_C_REVTPSS, GGA_C_REGTPSS'],
@@ -403,25 +416,28 @@ class Wien2kParser(FairdiParser):
         self.in1_parser = In1Parser()
         self.in2_parser = In2Parser()
         self.struct_parser = StructParser()
+        self.dos_parser = DosParser()
 
     def init_parser(self):
         self.out_parser.mainfile = self.filepath
         self.out_parser.logger = self.logger
 
-    def get_wien2k_file(self, ext):
-        paths = [p for p in os.listdir(self.maindir) if p.endswith(ext)]
+    def get_wien2k_file(self, ext, multiple=False):
+        paths = [p for p in os.listdir(self.maindir) if re.match(r'.*%s$' % ext, p)]
         if not paths:
-            return
+            return [] if multiple else None
         elif len(paths) == 1:
-            return os.path.join(self.maindir, paths[0])
+            path = os.path.join(self.maindir, paths[0])
+            return [path] if multiple else path
         else:
             prefix = os.path.basename(self.filepath).rsplit('.', 1)[0]
-            for path in paths:
-                if path.startswith(prefix):
-                    return os.path.join(self.maindir, path)
+            paths = [os.path.join(self.maindir, p) for p in paths if p.startswith(prefix)]
+            if not paths:
+                return [] if multiple else None
+            return paths if multiple else paths[0]
 
     def get_nspin(self):
-        return 2 if self.out_parser.get('VOL', {}).get('spinpolarization') == 'SPINPOLARIZED' else 1
+        return 2 if self.out_parser.get('iteration', [{}])[0].get('VOL', {}).get('spinpolarization') == 'SPINPOLARIZED' else 1
 
     def get_kpoints(self):
         k_list_file = self.get_wien2k_file('klist')
@@ -448,28 +464,35 @@ class Wien2kParser(FairdiParser):
     def get_eigenvalues(self):
         nspin = self.get_nspin()
         if nspin == 1:
-            files = [self.get_wien2k_file('energy')]
+            files = self.get_wien2k_file(r'energy\_\d+', multiple=True)
+            if not files:
+                files = [self.get_wien2k_file('energy')]
         else:
-            files = [self.get_wien2k_file('energyup'), self.get_wien2k_file('energydn')]
-        # TODO implement parallel output
+            files = []
+            for spin in ['up', 'dn']:
+                files_spin = self.get_wien2k_file(r'energy%s\_\d+' % spin, multiple=True)
+                if not files_spin:
+                    files_spin = [self.get_wien2k_file('energy%s' % spin)]
+                files.extend(files_spin)
         if None in files:
             return
 
         re_k = r'\-*\d\.\d+E[\-\+]\d\d'
-        re_kpoint = re.compile(rf'\s*({re_k})\s*({re_k})\s*({re_k})\w*\s*\d+\s*\d+\s*\d+\s*([\d\.]+)\s*')
-        re_eigenvalue = re.compile(r'\s*\d+\s*([\d\.\-\+E]+) *\n')
-        kpoints, eigenvalues, multiplicity = [], [], []
-        for n, file_i in enumerate(files):
+        re_kpoint = re.compile(rf'\s*({re_k})\s*({re_k})\s*({re_k})\w*\s*(\d+)\s*\d+\s*\d+\s*([\d\.]+)\s*')
+        re_eigenvalue = re.compile(r'\s*\d+ +(\-*\d+\.\d+[E\-\+\d]+) *\n*')
+        kpoints, eigenvalues, multiplicity, index = [], [], [], []
+        for file_i in files:
             with open(file_i) as f:
                 while True:
                     line = f.readline()
                     if not line:
                         break
-                    if n == 0:
+                    if 'energydn' not in file_i:
                         kpoint = re_kpoint.match(line)
                         if kpoint:
                             kpoints.append(kpoint.groups()[:3])
-                            multiplicity.append(kpoint.group(4))
+                            index.append(kpoint.group(4))
+                            multiplicity.append(kpoint.group(5))
                             continue
                     eigenvalue = re_eigenvalue.match(line)
                     if eigenvalue:
@@ -480,32 +503,67 @@ class Wien2kParser(FairdiParser):
             multiplicity = np.array(multiplicity, dtype=np.dtype(np.float64))
             eigenvalues = np.reshape(eigenvalues, (
                 nspin, len(kpoints), len(eigenvalues) // (nspin * len(kpoints))))
+            # sort data wrt kpoint index
+            index = np.argsort(index)
+            kpoints = kpoints[index]
+            multiplicity = multiplicity[index]
+            for spin in range(nspin):
+                eigenvalues[spin] = eigenvalues[spin][index]
             return eigenvalues, kpoints, multiplicity
         except Exception:
             self.logger.error('Error reading eigenvalues.')
             return
 
     def get_dos(self):
+        # dos (projections and total) are printed in dos1, dos2....
         nspin = self.get_nspin()
         if nspin == 1:
-            files = [self.get_wien2k_file('dos1')]
+            files = self.get_wien2k_file(r'dos\d+', multiple=True)
+            files.sort()
         else:
-            files = [self.get_wien2k_file('dos1up'), self.get_wien2k_file('dos1dn')]
-        # TODO implement parallel output
-        if None in files:
+            files = []
+            for spin in ['up', 'dn']:
+                files_spin = self.get_wien2k_file(r'dos\d+%s' % spin, multiple=True)
+                files_spin.sort()
+                files.extend(files_spin)
+
+        if not files:
             return
 
         dos = []
+        labels = []
         for file_i in files:
-            try:
-                data = np.transpose(np.loadtxt(file_i))
-            except Exception:
-                self.logger.error('Error reading dos.')
-                return
+            self.dos_parser.mainfile = file_i
+            data = self.dos_parser.get('data')
+            if data is None:
+                continue
+            if not file_i.endswith('dn'):
+                labels.extend(self.dos_parser.get('labels', '').split())
+            data = np.transpose(data)
             energy = data[0]
-            dos.append(data[1])
+            dos.append(data[1:])
 
-        return energy, dos
+        try:
+            dos = np.vstack(dos)
+            dos = np.reshape(dos, (nspin, len(dos) // nspin, len(dos[0])))
+            dos = np.transpose(dos, axes=(1, 0, 2))
+            total_dos = []
+            partial_dos = []
+            for n in range(len(dos)):
+                # wien2k may not uniformly print out projections, we get only total projections
+                # on the species (independent atoms) denoted by the header N:total
+                if labels[n].endswith(':total'):
+                    partial_dos.append(dos[n])
+                elif labels[n] == 'total-DOS' or labels[n] == 'TOTAL':
+                    # TODO determine if total dos is always the last column
+                    total_dos = dos[n]
+            if len(partial_dos) > 0:
+                partial_dos = np.transpose(partial_dos, axes=(1, 0, 2))
+            return energy, total_dos, partial_dos
+
+        except Exception:
+            self.logger.error('Error reading dos.')
+            return
 
     def parse_scc(self):
         if self.out_parser.get('iteration') is None:
@@ -579,9 +637,19 @@ class Wien2kParser(FairdiParser):
         # dos
         dos = self.get_dos()
         if dos is not None:
-            sec_dos = sec_scc.m_create(Dos)
-            sec_dos.dos_values = (dos[1] * (1 / ureg.rydberg)).to('1 / J').magnitude
-            sec_dos.dos_energies = dos[0] * ureg.rydberg
+            # total dos
+            if len(dos[1]) > 0:
+                sec_dos = sec_scc.m_create(Dos)
+                sec_dos.dos_values = (dos[1] * (1 / ureg.rydberg)).to('1 / J').magnitude
+                sec_dos.dos_energies = dos[0] * ureg.rydberg
+
+            # projected dos
+            if len(dos[2]) > 0:
+                sec_dos = sec_scc.m_create(SpeciesProjectedDos)
+                sec_dos.species_projected_dos_energies = dos[0] * ureg.rydberg
+                sec_dos.species_projected_dos_values_total = (dos[2] * (1 / ureg.rydberg)).to('1 / J').magnitude
+                labels = [a.atom_name for a in self.struct_parser.get('atom', [])]
+                sec_dos.species_projected_dos_species_label = labels
 
     def parse_system(self):
         sec_system = self.archive.section_run[0].m_create(System)

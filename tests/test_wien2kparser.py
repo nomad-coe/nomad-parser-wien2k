@@ -81,3 +81,19 @@ def test_eigenvalues(parser):
     assert len(sec_dos.dos_energies) == 1251
     assert sec_dos.dos_values[0][1178] == approx(5.93635529e+19)
     assert sec_dos.dos_energies[285].magnitude == approx(-9.37345115e-19)
+
+
+def test_dos(parser):
+    archive = EntryArchive()
+    parser.parse('tests/data/dos/CrO2-sp.scf', archive, None)
+
+    # eigenvalues are problematic as shape is not homogenously
+
+    sec_dos = archive.section_run[0].section_single_configuration_calculation[0].section_dos[0]
+    assert np.shape(sec_dos.dos_values) == (2, 1000)
+    assert sec_dos.dos_energies[26].magnitude == approx(-9.76582818e-19)
+    assert sec_dos.dos_values[1][334] == approx(1.32586595e+19)
+
+    sec_dos = archive.section_run[0].section_single_configuration_calculation[0].section_species_projected_dos[0]
+    assert np.shape(sec_dos.species_projected_dos_values_total) == (2, 2, 1000)
+    assert sec_dos.species_projected_dos_values_total[0][1][926] == approx(1.20913559e+18)

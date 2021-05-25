@@ -387,9 +387,7 @@ class Wien2kParser(FairdiParser):
             'XC_PBESOL': ['GGA_X_PBE_SOL', 'GGA_C_PBE_SOL'],
             'XC_B3PW91': ['HYB_GGA_XC_B3PW91'],
             'XC_B3LYP': ['HYB_GGA_XC_B3LYP'],
-            # see issue #1, not sure where TB09 comes from
             'XC_MBJ': ['MGGA_X_TB09', 'LDA_C_PW'],
-            'XC_LMBJ': ['LDA_X', 'LDA_C_PW'],
             'XC_TPSS': ['MGGA_X_TPSS', 'MGGA_C_TPSS'],
             'XC_REVTPSS': ['MGGA_C_REVTPSS, GGA_C_REGTPSS'],
             'XC_MGGA_MS': ['MGGA_X_MS', 'MGGA_C_MS'],

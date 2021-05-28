@@ -29,7 +29,7 @@ from nomad.parsing import FairdiParser
 from nomad.parsing.file_parser import TextParser, Quantity
 from nomad.datamodel.metainfo.common_dft import Run, Method, System, XCFunctionals,\
     SingleConfigurationCalculation, ScfIteration, Eigenvalues, SamplingMethod, Dos,\
-    SpeciesProjectedDos
+    DosValues
 
 from wien2kparser.metainfo import m_env
 from wien2kparser.metainfo.wien2k import x_wien2k_section_equiv_atoms
@@ -637,17 +637,22 @@ class Wien2kParser(FairdiParser):
         if dos is not None:
             # total dos
             if len(dos[1]) > 0:
-                sec_dos = sec_scc.m_create(Dos)
-                sec_dos.dos_values = (dos[1] * (1 / ureg.rydberg)).to('1 / J').magnitude
+                sec_dos = sec_scc.m_create(Dos, SingleConfigurationCalculation.dos_electronic)
                 sec_dos.dos_energies = dos[0] * ureg.rydberg
+                for spin in range(len(dos[1])):
+                    sec_dos_values = sec_dos.m_create(DosValues, Dos.dos_total)
+                    sec_dos_values.dos_spin = spin
+                    sec_dos_values.dos_values = (dos[1][spin] * (1 / ureg.rydberg)).to('1 / J').magnitude
 
             # projected dos
             if len(dos[2]) > 0:
-                sec_dos = sec_scc.m_create(SpeciesProjectedDos)
-                sec_dos.species_projected_dos_energies = dos[0] * ureg.rydberg
-                sec_dos.species_projected_dos_values_total = (dos[2] * (1 / ureg.rydberg)).to('1 / J').magnitude
                 labels = [a.atom_name for a in self.struct_parser.get('atom', [])]
-                sec_dos.species_projected_dos_species_label = labels
+                for species in range(len(dos[2])):
+                    for spin in range(len(dos[2][species])):
+                        sec_dos_values = sec_dos.m_create(DosValues, Dos.dos_species_projected)
+                        sec_dos_values.dos_atom_label = labels[species]
+                        sec_dos_values.dos_spin = spin
+                        sec_dos_values.dos_values = (dos[2][species][spin] * (1 / ureg.rydberg)).to('1 / J').magnitude
 
     def parse_system(self):
         sec_system = self.archive.section_run[0].m_create(System)

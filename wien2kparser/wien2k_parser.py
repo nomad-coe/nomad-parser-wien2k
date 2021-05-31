@@ -28,8 +28,8 @@ from nomad.units import ureg
 from nomad.parsing import FairdiParser
 from nomad.parsing.file_parser import TextParser, Quantity
 from nomad.datamodel.metainfo.common_dft import Run, Method, System, XCFunctionals,\
-    SingleConfigurationCalculation, ScfIteration, Eigenvalues, SamplingMethod, Dos,\
-    DosValues
+    SingleConfigurationCalculation, ScfIteration, BandEnergies, BandEnergiesValues,\
+    SamplingMethod, Dos, DosValues
 
 from wien2kparser.metainfo import m_env
 from wien2kparser.metainfo.wien2k import x_wien2k_section_equiv_atoms
@@ -627,10 +627,15 @@ class Wien2kParser(FairdiParser):
         # eigenvalues
         eigenvalues = self.get_eigenvalues()
         if eigenvalues is not None:
-            sec_eigenvalues = sec_scc.m_create(Eigenvalues)
-            sec_eigenvalues.eigenvalues_values = eigenvalues[0] * ureg.rydberg
-            sec_eigenvalues.eigenvalues_kpoints = eigenvalues[1]
-            sec_eigenvalues.eigenvalues_kpoints_multiplicity = eigenvalues[2]
+            sec_eigenvalues = sec_scc.m_create(BandEnergies)
+            sec_eigenvalues.band_energies_kpoints = eigenvalues[1]
+            sec_eigenvalues.band_energies_kpoints_multiplicities = eigenvalues[2]
+            for spin in range(len(eigenvalues[0])):
+                for kpt in range(len(eigenvalues[0][spin])):
+                    sec_eigenvalues_values = sec_eigenvalues.m_create(BandEnergiesValues)
+                    sec_eigenvalues_values.band_energies_spin = spin
+                    sec_eigenvalues_values.band_energies_kpoints_index = kpt
+                    sec_eigenvalues_values.band_energies_values = eigenvalues[0][spin][kpt] * ureg.rydberg
 
         # dos
         dos = self.get_dos()

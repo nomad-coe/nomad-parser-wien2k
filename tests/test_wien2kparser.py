@@ -69,12 +69,12 @@ def test_eigenvalues(parser):
     archive = EntryArchive()
     parser.parse('tests/data/eigenvalues/64k_8Rk_mBJkol.scf', archive, None)
 
-    sec_eigenvalues = archive.section_run[0].section_single_configuration_calculation[0].section_eigenvalues[0]
-    assert np.shape(sec_eigenvalues.eigenvalues_values) == (1, 8, 315)
-    assert np.shape(sec_eigenvalues.eigenvalues_kpoints) == (8, 3)
-    assert sec_eigenvalues.eigenvalues_values[0][2][31].magnitude == approx(-2.98121062e-18)
-    assert sec_eigenvalues.eigenvalues_kpoints[7][0] == 0.375
-    assert sec_eigenvalues.eigenvalues_kpoints_multiplicity[6] == 8
+    sec_eigenvalues = archive.section_run[0].section_single_configuration_calculation[0].eigenvalues[0]
+    assert np.shape(sec_eigenvalues.band_energies[7].band_energies_values) == (315,)
+    assert np.shape(sec_eigenvalues.band_energies_kpoints) == (8, 3)
+    assert sec_eigenvalues.band_energies[2].band_energies_values[31].magnitude == approx(-2.98121062e-18)
+    assert sec_eigenvalues.band_energies_kpoints[7][0] == 0.375
+    assert sec_eigenvalues.band_energies_kpoints_multiplicities[6] == 8
 
     sec_dos = archive.section_run[0].section_single_configuration_calculation[0].dos_electronic[0]
     assert np.shape(sec_dos.dos_total[0].dos_values) == (1251,)

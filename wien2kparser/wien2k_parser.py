@@ -643,21 +643,21 @@ class Wien2kParser(FairdiParser):
             # total dos
             if len(dos[1]) > 0:
                 sec_dos = sec_scc.m_create(Dos, SingleConfigurationCalculation.dos_electronic)
-                sec_dos.dos_energies = dos[0] * ureg.rydberg
+                sec_dos.energies = dos[0] * ureg.rydberg
                 for spin in range(len(dos[1])):
-                    sec_dos_values = sec_dos.m_create(DosValues, Dos.dos_total)
-                    sec_dos_values.dos_spin = spin
-                    sec_dos_values.dos_values = (dos[1][spin] * (1 / ureg.rydberg)).to('1 / J').magnitude
+                    sec_dos_values = sec_dos.m_create(DosValues, Dos.total)
+                    sec_dos_values.spin = spin
+                    sec_dos_values.value = dos[1][spin] * (1 / ureg.rydberg)
 
             # projected dos
             if len(dos[2]) > 0:
                 labels = [a.atom_name for a in self.struct_parser.get('atom', [])]
                 for species in range(len(dos[2])):
                     for spin in range(len(dos[2][species])):
-                        sec_dos_values = sec_dos.m_create(DosValues, Dos.dos_species_projected)
-                        sec_dos_values.dos_atom_label = labels[species]
-                        sec_dos_values.dos_spin = spin
-                        sec_dos_values.dos_values = (dos[2][species][spin] * (1 / ureg.rydberg)).to('1 / J').magnitude
+                        sec_dos_values = sec_dos.m_create(DosValues, Dos.species_projected)
+                        sec_dos_values.atom_label = labels[species]
+                        sec_dos_values.spin = spin
+                        sec_dos_values.value = dos[2][species][spin] * (1 / ureg.rydberg)
 
     def parse_system(self):
         sec_system = self.archive.section_run[0].m_create(System)

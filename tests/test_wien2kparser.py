@@ -77,10 +77,10 @@ def test_eigenvalues(parser):
     assert sec_eigenvalues.band_energies_kpoints_multiplicities[6] == 8
 
     sec_dos = archive.section_run[0].section_single_configuration_calculation[0].dos_electronic[0]
-    assert np.shape(sec_dos.dos_total[0].dos_values) == (1251,)
-    assert len(sec_dos.dos_energies) == 1251
-    assert sec_dos.dos_total[0].dos_values[1178] == approx(5.93635529e+19)
-    assert sec_dos.dos_energies[285].magnitude == approx(-9.37345115e-19)
+    assert np.shape(sec_dos.total[0].value) == (1251,)
+    assert len(sec_dos.energies) == 1251
+    assert sec_dos.total[0].value[1178].magnitude == approx(5.93635529e+19)
+    assert sec_dos.energies[285].magnitude == approx(-9.37345115e-19)
 
 
 def test_dos(parser):
@@ -90,9 +90,9 @@ def test_dos(parser):
     # eigenvalues are problematic as shape is not homogenously
 
     sec_dos = archive.section_run[0].section_single_configuration_calculation[0].dos_electronic[0]
-    assert np.shape(sec_dos.dos_total[1].dos_values) == (1000,)
-    assert sec_dos.dos_energies[26].magnitude == approx(-9.76582818e-19)
-    assert sec_dos.dos_total[1].dos_values[334] == approx(1.32586595e+19)
+    assert np.shape(sec_dos.total[1].value) == (1000,)
+    assert sec_dos.energies[26].magnitude == approx(-9.76582818e-19)
+    assert sec_dos.total[1].value[334].magnitude == approx(1.32586595e+19)
 
-    assert np.shape(sec_dos.dos_species_projected[1].dos_values) == (1000,)
-    assert sec_dos.dos_species_projected[1].dos_values[926] == approx(1.20913559e+18)
+    assert np.shape(sec_dos.species_projected[1].value) == (1000,)
+    assert sec_dos.species_projected[1].value[926].magnitude == approx(1.20913559e+18)

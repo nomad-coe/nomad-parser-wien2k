@@ -628,14 +628,14 @@ class Wien2kParser(FairdiParser):
         eigenvalues = self.get_eigenvalues()
         if eigenvalues is not None:
             sec_eigenvalues = sec_scc.m_create(BandEnergies)
-            sec_eigenvalues.band_energies_kpoints = eigenvalues[1]
-            sec_eigenvalues.band_energies_kpoints_multiplicities = eigenvalues[2]
+            sec_eigenvalues.kpoints = eigenvalues[1]
+            sec_eigenvalues.kpoints_multiplicities = eigenvalues[2]
             for spin in range(len(eigenvalues[0])):
                 for kpt in range(len(eigenvalues[0][spin])):
                     sec_eigenvalues_values = sec_eigenvalues.m_create(BandEnergiesValues)
-                    sec_eigenvalues_values.band_energies_spin = spin
-                    sec_eigenvalues_values.band_energies_kpoints_index = kpt
-                    sec_eigenvalues_values.band_energies_values = eigenvalues[0][spin][kpt] * ureg.rydberg
+                    sec_eigenvalues_values.spin = spin
+                    sec_eigenvalues_values.kpoints_index = kpt
+                    sec_eigenvalues_values.value = eigenvalues[0][spin][kpt] * ureg.rydberg
 
         # dos
         dos = self.get_dos()

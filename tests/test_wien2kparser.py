@@ -70,9 +70,9 @@ def test_eigenvalues(parser):
     parser.parse('tests/data/eigenvalues/64k_8Rk_mBJkol.scf', archive, None)
 
     sec_eigenvalues = archive.section_run[0].section_single_configuration_calculation[0].eigenvalues[0]
-    assert np.shape(sec_eigenvalues.band_energies[7].value) == (315,)
+    assert np.shape(sec_eigenvalues.value[0][7]) == (315,)
     assert np.shape(sec_eigenvalues.kpoints) == (8, 3)
-    assert sec_eigenvalues.band_energies[2].value[31].magnitude == approx(-2.98121062e-18)
+    assert sec_eigenvalues.value[0][2][31].magnitude == approx(-2.98121062e-18)
     assert sec_eigenvalues.kpoints[7][0] == 0.375
     assert sec_eigenvalues.kpoints_multiplicities[6] == 8
 

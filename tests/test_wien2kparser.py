@@ -48,9 +48,9 @@ def test_single_point(parser):
     assert sec_method.x_wien2k_in2_espermin == 0.50
 
     sec_scc = archive.section_run[0].section_single_configuration_calculation[0]
-    assert sec_scc.energy_total.magnitude == approx(-8.09654094e-15)
-    assert np.shape(sec_scc.atom_forces) == (49, 3)
-    assert sec_scc.atom_forces[19][1].magnitude == approx(-2.76650574e-10)
+    assert sec_scc.energy_total.value.magnitude == approx(-8.09654094e-15)
+    assert np.shape(sec_scc.forces_total.value) == (49, 3)
+    assert sec_scc.forces_total.value[19][1].magnitude == approx(-2.76650574e-10)
     assert sec_scc.energy_reference_fermi[0].magnitude == approx(-4.46784636e-19)
     sec_scfs = sec_scc.section_scf_iteration
     assert len(sec_scfs) == 40

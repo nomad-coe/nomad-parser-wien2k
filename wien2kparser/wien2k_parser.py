@@ -29,7 +29,7 @@ from nomad.parsing import FairdiParser
 from nomad.parsing.file_parser import TextParser, Quantity
 from nomad.datamodel.metainfo.common_dft import Run, Method, System, XCFunctionals,\
     SingleConfigurationCalculation, ScfIteration, BandEnergies, BandEnergiesValues,\
-    SamplingMethod, Dos, DosValues
+    SamplingMethod, Dos, DosValues, Energy, Forces
 
 from wien2kparser.metainfo import m_env
 from wien2kparser.metainfo.wien2k import x_wien2k_section_equiv_atoms
@@ -614,13 +614,15 @@ class Wien2kParser(FairdiParser):
                         setattr(sec_scf, sub_key, val)
 
         # write final iteration values to scc
-        sec_scc.energy_total = sec_scf.energy_total_scf_iteration
+        sec_scc.m_add_sub_section(SingleConfigurationCalculation.energy_total, Energy(
+            value=sec_scf.energy_total_scf_iteration))
 
         if sec_scf.x_wien2k_for_gl is not None:
             forces = []
             for n, force in enumerate(sec_scf.x_wien2k_for_gl):
                 forces.extend([force] * sec_scf.x_wien2k_atom_mult[n])
-            sec_scc.atom_forces = forces * (ureg.mRy / ureg.bohr)
+            sec_scc.m_add_sub_section(SingleConfigurationCalculation.forces_total, Forces(
+                value=forces * (ureg.mRy / ureg.bohr)))
 
         sec_scc.energy_reference_fermi = sec_scf.energy_reference_fermi_iteration
 

@@ -217,7 +217,7 @@ class OutParser(TextParser):
                 r'(FER\s*\:[\s\S]+?)\n *\:',
                 sub_parser=TextParser(quantities=[
                     Quantity(
-                        'energy_reference_fermi_iteration',
+                        'energy_reference_fermi',
                         rf'F E R M I \- ENERGY.+?\=\s*([\d\.\-\+Ee ]+)',
                         str_operation=lambda x: [float(v) for v in x.strip().split()] * ureg.rydberg,
                         convert=False)])),
@@ -251,7 +251,7 @@ class OutParser(TextParser):
                 r'(SUM\s*\:[\s\S]+?)\n *\:',
                 sub_parser=TextParser(quantities=[
                     Quantity(
-                        'energy_sum_eigenvalues_scf_iteration',
+                        'energy_sum_eigenvalues',
                         rf'SUM OF EIGENVALUES\s*\=\s*({re_float})',
                         dtype=np.float64, unit=ureg.rydberg)])),
             Quantity(
@@ -330,7 +330,7 @@ class OutParser(TextParser):
                 r'(ENE\s*\:[\s\S]+?)\n',
                 sub_parser=TextParser(quantities=[
                     Quantity(
-                        'energy_total_scf_iteration',
+                        'energy_total',
                         rf'TOTAL ENERGY IN Ry\s*\=\s*({re_float})',
                         dtype=np.float64, unit=ureg.rydberg)])),
             Quantity(
@@ -571,7 +571,6 @@ class Wien2kParser(FairdiParser):
 
         for iteration in self.out_parser.get('iteration'):
             sec_scf = sec_scc.m_create(ScfIteration)
-            # sec_scf.energy_total_scf_iteration =
             for key in iteration.keys():
                 if iteration.get(key) is None:
                     continue
@@ -610,12 +609,17 @@ class Wien2kParser(FairdiParser):
                     sec_scf.x_wien2k_atom_mult = mult
                 else:
                     for sub_key, val in iteration.get(key, {}).items():
-                        sub_key = sub_key if sub_key.startswith('energy_') else 'x_wien2k_%s' % sub_key
-                        setattr(sec_scf, sub_key, val)
+                        if sub_key.startswith('energy_reference_fermi'):
+                            sec_scf.energy_reference_fermi = val
+                        elif sub_key.startswith('energy_'):
+                            sec_scf.m_add_sub_section(
+                                getattr(ScfIteration, sub_key), Energy(value=val))
+                        else:
+                            setattr(sec_scf, 'x_wien2k_%s' % sub_key, val)
 
         # write final iteration values to scc
         sec_scc.m_add_sub_section(SingleConfigurationCalculation.energy_total, Energy(
-            value=sec_scf.energy_total_scf_iteration))
+            value=sec_scf.energy_total.value))
 
         if sec_scf.x_wien2k_for_gl is not None:
             forces = []
@@ -624,7 +628,7 @@ class Wien2kParser(FairdiParser):
             sec_scc.m_add_sub_section(SingleConfigurationCalculation.forces_total, Forces(
                 value=forces * (ureg.mRy / ureg.bohr)))
 
-        sec_scc.energy_reference_fermi = sec_scf.energy_reference_fermi_iteration
+        sec_scc.energy_reference_fermi = sec_scf.energy_reference_fermi
 
         # eigenvalues
         eigenvalues = self.get_eigenvalues()

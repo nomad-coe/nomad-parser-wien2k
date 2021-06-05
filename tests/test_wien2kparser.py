@@ -52,9 +52,9 @@ def test_single_point(parser):
     assert np.shape(sec_scc.forces_total.value) == (49, 3)
     assert sec_scc.forces_total.value[19][1].magnitude == approx(-2.76650574e-10)
     assert sec_scc.energy_reference_fermi[0].magnitude == approx(-4.46784636e-19)
-    sec_scfs = sec_scc.section_scf_iteration
+    sec_scfs = sec_scc.scf_iteration
     assert len(sec_scfs) == 40
-    assert sec_scfs[21].energy_total_scf_iteration.magnitude == approx(-8.09654095e-15)
+    assert sec_scfs[21].energy_total.value.magnitude == approx(-8.09654095e-15)
     assert sec_scfs[6].x_wien2k_noe == 196.000
     assert sec_scfs[17].x_wien2k_tot_diff_charge[9] == approx(0.0001539)
 

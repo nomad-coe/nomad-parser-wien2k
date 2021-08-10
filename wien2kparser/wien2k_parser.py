@@ -27,11 +27,18 @@ from ase import Atoms
 from nomad.units import ureg
 from nomad.parsing import FairdiParser
 from nomad.parsing.file_parser import TextParser, Quantity
-from nomad.datamodel.metainfo.common_dft import Run, Method, System, XCFunctionals,\
-    SingleConfigurationCalculation, ScfIteration, BandEnergies,\
-    SamplingMethod, Dos, DosValues, Energy, Forces
-
-from wien2kparser.metainfo import m_env
+from nomad.datamodel.metainfo.run.run import Run, Program, TimeRun
+from nomad.datamodel.metainfo.run.method import (
+    Electronic, Method, DFT, Smearing, XCFunctional, Functional, KMesh, BasisSet
+)
+from nomad.datamodel.metainfo.run.system import (
+    System, Atoms
+)
+from nomad.datamodel.metainfo.run.calculation import (
+    Calculation, Forces, ForcesEntry, ScfIteration, Energy, EnergyEntry, BandEnergies, Dos,
+    DosValues
+)
+from nomad.datamodel.metainfo.workflow import Workflow
 from wien2kparser.metainfo.wien2k import x_wien2k_section_equiv_atoms
 
 
@@ -408,7 +415,6 @@ class Wien2kParser(FairdiParser):
             'EX_LDA': ['HF_X'],
             'VX_LDA': ['HF_X']}
 
-        self._metainfo_env = m_env
         self.out_parser = OutParser()
         self.in0_parser = In0Parser()
         self.in1_parser = In1Parser()
@@ -567,10 +573,11 @@ class Wien2kParser(FairdiParser):
         if self.out_parser.get('iteration') is None:
             return
 
-        sec_scc = self.archive.section_run[0].m_create(SingleConfigurationCalculation)
+        sec_scc = self.archive.run[0].m_create(Calculation)
 
         for iteration in self.out_parser.get('iteration'):
             sec_scf = sec_scc.m_create(ScfIteration)
+            sec_scf_energy = sec_scf.m_create(Energy)
             for key in iteration.keys():
                 if iteration.get(key) is None:
                     continue
@@ -610,25 +617,23 @@ class Wien2kParser(FairdiParser):
                 else:
                     for sub_key, val in iteration.get(key, {}).items():
                         if sub_key.startswith('energy_reference_fermi'):
-                            sec_scf.energy_reference_fermi = val
+                            sec_scf_energy.fermi = val
                         elif sub_key.startswith('energy_'):
-                            sec_scf.m_add_sub_section(
-                                getattr(ScfIteration, sub_key), Energy(value=val))
+                            sec_scf_energy.m_add_sub_section(
+                                getattr(Energy, sub_key.replace('energy_', '').lower()), EnergyEntry(value=val))
                         else:
                             setattr(sec_scf, 'x_wien2k_%s' % sub_key, val)
 
         # write final iteration values to scc
-        sec_scc.m_add_sub_section(SingleConfigurationCalculation.energy_total, Energy(
-            value=sec_scf.energy_total.value))
+        sec_scc.energy = Energy(total=EnergyEntry(value=sec_scf.energy.total.value))
 
         if sec_scf.x_wien2k_for_gl is not None:
             forces = []
             for n, force in enumerate(sec_scf.x_wien2k_for_gl):
                 forces.extend([force] * sec_scf.x_wien2k_atom_mult[n])
-            sec_scc.m_add_sub_section(SingleConfigurationCalculation.forces_total, Forces(
-                value=forces * (ureg.mRy / ureg.bohr)))
+            sec_scc.forces = Forces(total=ForcesEntry(value=forces * (ureg.mRy / ureg.bohr)))
 
-        sec_scc.energy_reference_fermi = sec_scf.energy_reference_fermi
+        sec_scc.energy.fermi = sec_scf.energy.fermi
 
         # eigenvalues
         eigenvalues = self.get_eigenvalues()
@@ -643,7 +648,7 @@ class Wien2kParser(FairdiParser):
         if dos is not None:
             # total dos
             if len(dos[1]) > 0:
-                sec_dos = sec_scc.m_create(Dos, SingleConfigurationCalculation.dos_electronic)
+                sec_dos = sec_scc.m_create(Dos, Calculation.dos_electronic)
                 sec_dos.energies = dos[0] * ureg.rydberg
                 for spin in range(len(dos[1])):
                     sec_dos_values = sec_dos.m_create(DosValues, Dos.total)
@@ -661,7 +666,8 @@ class Wien2kParser(FairdiParser):
                         sec_dos_values.value = dos[2][species][spin] * (1 / ureg.rydberg)
 
     def parse_system(self):
-        sec_system = self.archive.section_run[0].m_create(System)
+        sec_system = self.archive.run[0].m_create(System)
+        sec_atoms = sec_system.m_create(Atoms)
 
         self.struct_parser.mainfile = self.get_wien2k_file('struct')
         for key, val in self.struct_parser.get('lattice', {}).items():
@@ -676,15 +682,17 @@ class Wien2kParser(FairdiParser):
         if atoms is None:
             return
 
-        sec_system.lattice_vectors = np.array(atoms.get_cell()) * ureg.angstrom
-        sec_system.atom_positions = atoms.get_positions() * ureg.angstrom
-        sec_system.atom_labels = atoms.get_chemical_symbols()
-        sec_system.configuration_periodic_dimensions = atoms.get_pbc()
+        sec_atoms.lattice_vectors = np.array(atoms.get_cell()) * ureg.angstrom
+        sec_atoms.positions = atoms.get_positions() * ureg.angstrom
+        sec_atoms.labels = atoms.get_chemical_symbols()
+        sec_atoms.periodic = atoms.get_pbc()
 
     def parse_method(self):
-        sec_method = self.archive.section_run[0].m_create(Method)
+        sec_method = self.archive.run[0].m_create(Method)
+        sec_dft = sec_method.m_create(DFT)
+        sec_electronic = sec_method.m_create(Electronic)
 
-        sec_method.number_of_spin_channels = self.get_nspin()
+        sec_electronic.n_spin_channels = self.get_nspin()
 
         # read functional settings from in0 file
         self.in0_parser.mainfile = self.get_wien2k_file('in0')
@@ -692,14 +700,21 @@ class Wien2kParser(FairdiParser):
         # better to read it from scf?
         xc_functional = self.in0_parser.get('xc_functional', None)
         xc_functional = xc_functional if isinstance(xc_functional, list) else [xc_functional]
+        sec_xc_functional = sec_dft.m_create(XCFunctional)
         for name in xc_functional:
             functionals = self._xc_functional_map.get(name)
             if functionals is None:
                 self.logger.warn('Cannot resolve XC functional.')
                 continue
             for functional in functionals:
-                sec_xc_functional = sec_method.m_create(XCFunctionals)
-                sec_xc_functional.XC_functional_name = functional
+                if '_X_' in functional or functional.endswith('_X'):
+                    sec_xc_functional.exchange.append(Functional(name=functional))
+                elif '_C_' in functional or functional.endswith('_C'):
+                    sec_xc_functional.correlation.append(Functional(name=functional))
+                elif 'HYB' in functional:
+                    sec_xc_functional.hybrid.append(Functional(name=functional))
+                else:
+                    sec_xc_functional.contributions.append(Functional(name=functional))
 
         fft = self.in0_parser.get('fft')
         if fft is not None:
@@ -733,20 +748,26 @@ class Wien2kParser(FairdiParser):
 
         smearing, width = self.in2_parser.get('smearing', [None, None])
         if smearing is not None:
+            sec_smearing = sec_electronic.m_create(Smearing)
             if smearing.startswith('GAUSS'):
                 smearing = 'gaussian'
             elif smearing.startswith('TEMP'):
                 smearing = 'fermi'
             elif smearing.startswith('TETRA'):
                 smearing = 'tetrahedra'
-            sec_method.smearing_kind = smearing
-            sec_method.smearing_width = (float(width) * ureg.rydberg).to('joule').magnitude
+            sec_smearing.kind = smearing
+            sec_smearing.width = (float(width) * ureg.rydberg).to('joule').magnitude
 
         # read kpoints from klist
         kpoints = self.get_kpoints()
         if kpoints is not None:
-            sec_method.k_mesh_points = kpoints[0]
-            sec_method.k_mesh_weights = kpoints[1]
+            sec_k_mesh = sec_method.m_create(KMesh)
+            sec_k_mesh.points = kpoints[0]
+            sec_k_mesh.weights = kpoints[1]
+
+        # basis
+        sec_method.basis_set.append(BasisSet(kind='(L)APW+lo'))
+
 
     def parse(self, filepath, archive, logger):
         self.filepath = os.path.abspath(filepath)
@@ -758,18 +779,16 @@ class Wien2kParser(FairdiParser):
 
         sec_run = self.archive.m_create(Run)
 
-        sec_run.program_name = 'WIEN2k'
-        sec_run.program_basis_set_type = '(L)APW+lo'
-        sec_run.program_version = self.out_parser.get('version', '')
+        sec_run.program = Program(name='WIEN2k', version=self.out_parser.get('version', ''))
         start_date = self.out_parser.get('start_date')
         if start_date is not None:
             # TODO resolve proper timezone
             dt = datetime.strptime(start_date, '%b %d %H:%M:%S %Y') - datetime.utcfromtimestamp(0)
-            sec_run.time_run_date_start = dt.total_seconds()
+            sec_run.time_run = TimeRun(date_start=dt.total_seconds())
 
         # TODO implement geometry optimization
-        sec_sampling = sec_run.m_create(SamplingMethod)
-        sec_sampling.sampling_method = 'single_point'
+        sec_workflow = self.archive.m_create(Workflow)
+        sec_workflow.type = 'single_point'
 
         self.parse_method()
 

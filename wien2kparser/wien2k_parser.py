@@ -641,7 +641,7 @@ class Wien2kParser(FairdiParser):
             sec_eigenvalues = sec_scc.m_create(BandEnergies)
             sec_eigenvalues.kpoints = eigenvalues[1]
             sec_eigenvalues.kpoints_multiplicities = eigenvalues[2]
-            sec_eigenvalues.value = eigenvalues[0] * ureg.rydberg
+            sec_eigenvalues.energies = eigenvalues[0] * ureg.rydberg
 
         # dos
         dos = self.get_dos()
@@ -767,7 +767,6 @@ class Wien2kParser(FairdiParser):
 
         # basis
         sec_method.basis_set.append(BasisSet(kind='(L)APW+lo'))
-
 
     def parse(self, filepath, archive, logger):
         self.filepath = os.path.abspath(filepath)

@@ -766,7 +766,7 @@ class Wien2kParser(FairdiParser):
             sec_k_mesh.weights = kpoints[1]
 
         # basis
-        sec_method.basis_set.append(BasisSet(kind='(L)APW+lo'))
+        sec_method.basis_set.append(BasisSet(type='(L)APW+lo'))
 
     def parse(self, filepath, archive, logger):
         self.filepath = os.path.abspath(filepath)

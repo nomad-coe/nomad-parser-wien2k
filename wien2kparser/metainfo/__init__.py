@@ -16,4 +16,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-import wien2kparser.metainfo.wien2k
+from nomad.metainfo import Environment
+
+from . import wien2k
+
+m_env = Environment()
+m_env.m_add_sub_section(Environment.packages, wien2k.m_package)

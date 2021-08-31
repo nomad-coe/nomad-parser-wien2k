@@ -27,14 +27,14 @@ from ase import Atoms
 from nomad.units import ureg
 from nomad.parsing import FairdiParser
 from nomad.parsing.file_parser import TextParser, Quantity
-from nomad.datamodel.metainfo.run.run import Run, Program, TimeRun
-from nomad.datamodel.metainfo.run.method import (
+from nomad.datamodel.metainfo.simulation.run import Run, Program, TimeRun
+from nomad.datamodel.metainfo.simulation.method import (
     Electronic, Method, DFT, Smearing, XCFunctional, Functional, KMesh, BasisSet
 )
-from nomad.datamodel.metainfo.run.system import (
+from nomad.datamodel.metainfo.simulation.system import (
     System, Atoms
 )
-from nomad.datamodel.metainfo.run.calculation import (
+from nomad.datamodel.metainfo.simulation.calculation import (
     Calculation, Forces, ForcesEntry, ScfIteration, Energy, EnergyEntry, BandEnergies, Dos,
     DosValues
 )

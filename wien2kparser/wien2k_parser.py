@@ -481,9 +481,9 @@ class Wien2kParser(FairdiParser):
         if None in files:
             return
 
-        re_k = r'\-*\d\.\d+E[\-\+]\d\d'
+        re_k = r'\-?\d\.\d+E[\-\+]\d\d'
         re_kpoint = re.compile(rf'\s*({re_k})\s*({re_k})\s*({re_k})\w*\s*(\d+)\s*\d+\s*\d+\s*([\d\.]+)\s*')
-        re_eigenvalue = re.compile(r'\s*\d+ +(\-*\d+\.\d+[E\-\+\d]+) *\n*')
+        re_eigenvalue = re.compile(r'\s*\d+ +(\-?\d+\.\d+[E\-\+\d]+) *\n*')
         kpoints, eigenvalues, multiplicity, index = [], [], [], []
         for file_i in files:
             with open(file_i) as f:
@@ -625,7 +625,8 @@ class Wien2kParser(FairdiParser):
                             setattr(sec_scf, 'x_wien2k_%s' % sub_key, val)
 
         # write final iteration values to scc
-        sec_scc.energy = Energy(total=EnergyEntry(value=sec_scf.energy.total.value))
+        if sec_scf.energy.total is not None:
+            sec_scc.energy = Energy(total=EnergyEntry(value=sec_scf.energy.total.value))
 
         if sec_scf.x_wien2k_for_gl is not None:
             forces = []
@@ -633,7 +634,8 @@ class Wien2kParser(FairdiParser):
                 forces.extend([force] * sec_scf.x_wien2k_atom_mult[n])
             sec_scc.forces = Forces(total=ForcesEntry(value=forces * (ureg.mRy / ureg.bohr)))
 
-        sec_scc.energy.fermi = sec_scf.energy.fermi
+        if sec_scf.energy.fermi is not None:
+            sec_scc.energy.fermi = sec_scf.energy.fermi
 
         # eigenvalues
         eigenvalues = self.get_eigenvalues()
@@ -658,12 +660,15 @@ class Wien2kParser(FairdiParser):
             # projected dos
             if len(dos[2]) > 0:
                 labels = [a.atom_name for a in self.struct_parser.get('atom', [])]
-                for species in range(len(dos[2])):
-                    for spin in range(len(dos[2][species])):
-                        sec_dos_values = sec_dos.m_create(DosValues, Dos.species_projected)
-                        sec_dos_values.atom_label = labels[species]
-                        sec_dos_values.spin = spin
-                        sec_dos_values.value = dos[2][species][spin] * (1 / ureg.rydberg)
+                if len(labels) == 0:
+                    self.logger.warn('Cannot resolve atom labels.')
+                else:
+                    for species in range(len(dos[2])):
+                        for spin in range(len(dos[2][species])):
+                            sec_dos_values = sec_dos.m_create(DosValues, Dos.species_projected)
+                            sec_dos_values.atom_label = labels[species]
+                            sec_dos_values.spin = spin
+                            sec_dos_values.value = dos[2][species][spin] * (1 / ureg.rydberg)
 
     def parse_system(self):
         sec_system = self.archive.run[0].m_create(System)

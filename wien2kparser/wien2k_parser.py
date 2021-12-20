@@ -627,15 +627,14 @@ class Wien2kParser(FairdiParser):
         # write final iteration values to scc
         if sec_scf.energy.total is not None:
             sec_scc.energy = Energy(total=EnergyEntry(value=sec_scf.energy.total.value))
+            if sec_scf.energy.fermi is not None:
+                sec_scc.energy.fermi = sec_scf.energy.fermi
 
         if sec_scf.x_wien2k_for_gl is not None:
             forces = []
             for n, force in enumerate(sec_scf.x_wien2k_for_gl):
                 forces.extend([force] * sec_scf.x_wien2k_atom_mult[n])
             sec_scc.forces = Forces(total=ForcesEntry(value=forces * (ureg.mRy / ureg.bohr)))
-
-        if sec_scf.energy.fermi is not None:
-            sec_scc.energy.fermi = sec_scf.energy.fermi
 
         # eigenvalues
         eigenvalues = self.get_eigenvalues()
